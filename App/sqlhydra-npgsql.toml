@@ -1,0 +1,16 @@
+[general]
+connection = "Host=localhost;Port=5432;Username=ictdb;Password=ictdbpwd;Database=ictdb"
+output = "Generated/Db.fs"
+namespace = "App.Generated.Db"
+cli_mutable = true
+
+[sqlhydra_query_integration]
+provider_db_type_attributes = true
+table_declarations = true
+
+[readers]
+reader_type = "Npgsql.NpgsqlDataReader"
+
+[filters]
+include = []
+exclude = []

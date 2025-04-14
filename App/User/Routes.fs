@@ -1,0 +1,8 @@
+module App.User.Routes
+
+open Falco
+open Falco.Routing
+
+let routes =
+    [ all "/user/register" [ GET, Handlers.handleRegisterView; POST, Handlers.handleUserRegistration ]
+      all "/user/login" [ GET, Handlers.handleLoginView; POST, Handlers.handleUserLogin ] ]
