@@ -7,14 +7,18 @@
     <Compile Include="Generated/Db.fs">
       <Visible>False</Visible>
     </Compile>
+    <Compile Include="Utils.fs" />
     <Compile Include="DataSource.fs" />
-    <Compile Include="User\Domain.fs" />
     <Compile Include="User\Views.fs" />
-    <Compile Include="User\Service.fs" />
+    <Compile Include="User\Services.fs" />
     <Compile Include="User\Handlers.fs" />
     <Compile Include="User\Routes.fs" />
     <Compile Include="Endpoints.fs" />
+    <Compile Include="Setup.fs" />
     <Compile Include="Program.fs" />
+    <Content Include="..\docker-compose.yml">
+      <Link>docker-compose.yml</Link>
+    </Content>
   </ItemGroup>
   <!-- Regenerate entities on Rebuild in Debug mode -->
   <Target Name="SqlHydra" BeforeTargets="Clean" Condition="'$(Configuration)' == 'Debug'">

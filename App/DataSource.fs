@@ -1,12 +1,15 @@
 module App.DataSource
 
+open System
 open System.Threading.Tasks
 open App.Generated.Db.``public``
+open Microsoft.Extensions.Configuration
+open Microsoft.Extensions.DependencyInjection
 open Npgsql
 open SqlHydra.Query
 
 type IConnFactory =
-    abstract member OpenConn: unit -> ValueTask<NpgsqlConnection>
+    abstract member OpenConn: unit -> NpgsqlConnection ValueTask
 
 type NpgsqlConnFactory(connString: string) =
     let dataSource =
@@ -16,6 +19,11 @@ type NpgsqlConnFactory(connString: string) =
 
     interface IConnFactory with
         member _.OpenConn() = dataSource.OpenConnectionAsync()
+
+module NpgsqlConnFactory =
+    let make (sp: IServiceProvider) : IConnFactory =
+        let config = sp.GetService<IConfiguration>()
+        NpgsqlConnFactory(config.GetConnectionString("Docker"))
 
 let openCtx conn () =
     let compiler = SqlKata.Compilers.PostgresCompiler()
