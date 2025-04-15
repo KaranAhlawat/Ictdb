@@ -1,29 +1,31 @@
 module App.Setup
 
+open App.User.Persistence
+open App.User.Services
 open Falco
 open App.DataSource
-open App.User.Services
-open App.Utils
 open Microsoft.AspNetCore.Builder
+open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 
-let configureBuilder (builder: WebApplicationBuilder) =
+let configureApp (builder: WebApplicationBuilder) =
+
+    let connString = builder.Configuration.GetConnectionString "Docker"
+
+    let ctxf = NpgsqlCtxFactory.make connString
+
+    let userRepo = UserRepo.Live.mk ctxf
+    let userService = UserService.Live.mk userRepo
+
+    let endpoints = Endpoints.all userService
+
     builder.Services.AddAntiforgery() |> ignore
 
-    builder.Services.AddSingleton<IConnFactory>(Func.from (NpgsqlConnFactory.make))
-    |> ignore
+    let app = builder.Build()
 
-    builder.Services.AddSingleton<UserRepo.T>(Func.from (UserRepo.Live.fromDI))
-    |> ignore
-
-    builder.Services.AddScoped<UserService.T>(Func.from (UserService.Live.fromDI))
-    |> ignore
-
-    builder.Build()
-
-let configureApp (app: WebApplication) =
+    app.UseHttpsRedirection() |> ignore
     app.UseAntiforgery() |> ignore
     app.UseRouting() |> ignore
-    app.UseFalco(Endpoints.all) |> ignore
+    app.UseFalco(endpoints) |> ignore
 
     app

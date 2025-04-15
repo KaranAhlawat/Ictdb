@@ -9,8 +9,9 @@
     </Compile>
     <Compile Include="Utils.fs" />
     <Compile Include="DataSource.fs" />
-    <Compile Include="User\Views.fs" />
+    <Compile Include="User\Persistence.fs" />
     <Compile Include="User\Services.fs" />
+    <Compile Include="User\Views.fs" />
     <Compile Include="User\Handlers.fs" />
     <Compile Include="User\Routes.fs" />
     <Compile Include="Endpoints.fs" />
