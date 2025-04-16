@@ -1,6 +1,5 @@
 module App.User.Routes
 
-open App.User.Services
 open Falco
 open Falco.Routing
 

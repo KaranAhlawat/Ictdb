@@ -1,13 +1,15 @@
 module App.User.Handlers
 
 open System
-open System.Net
+open System.Linq
 open System.Security.Claims
+open System.Text.Json
 open App.Authentication
 open App.DataSource
 open App.User.Persistence
 open App.User.Services
 open App.Utils
+open BCrypt.Net
 open Falco
 
 open App.Generated.Db.``public``
@@ -36,11 +38,15 @@ let handleLoginView: HttpHandler =
                 Response.ofHtmlCsrf)
 
 let handleAccountView: HttpHandler =
-    CookieSession.authenticate (fun result ->
+    CookieSession.authenticate (fun result ctx ->
         if result.Succeeded then
-            Response.ofHtml (Views.userAccount result.Principal)
+            let account = CookieSession.account ctx
+
+            match account with
+            | None -> CookieSession.challengeTo "/user/account" ctx
+            | Some value -> Response.ofHtml (Views.userAccount value) ctx
         else
-            CookieSession.challengeTo "/user/account")
+            CookieSession.challengeTo "/user/account" ctx)
 
 let handleUserRegistration: HttpHandler =
     fun ctx ->
@@ -63,12 +69,14 @@ let handleUserRegistration: HttpHandler =
                     if confirmed <> 0 then
                         None
                     else
+                        let hashedPass = BCrypt.EnhancedHashPassword password
+
                         Some
                             { id = Guid()
                               provider_id = DateTime.UtcNow.ToString("o")
                               username = username
                               user_email = email
-                              user_password = Some password
+                              user_password = Some hashedPass
                               provider = account_type.form
                               created_at = DateTime.UtcNow
                               updated_at = DateTime.UtcNow })
@@ -83,9 +91,12 @@ let handleUserRegistration: HttpHandler =
 
             match account with
             | Some account ->
+                let json = JsonSerializer.Serialize account
+
                 let claims =
                     [ Claim(ClaimTypes.Name, account.username)
-                      Claim(ClaimTypes.Email, account.user_email) ]
+                      Claim(ClaimTypes.Email, account.user_email)
+                      Claim(ClaimTypes.UserData, json) ]
 
                 let identity =
                     ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)
@@ -93,6 +104,7 @@ let handleUserRegistration: HttpHandler =
                 let claims = ClaimsPrincipal(identity)
 
                 do! CookieSession.signIn claims ctx
+
                 return! Response.redirectTemporarily "/user/account" ctx
             | None -> return! Response.redirectTemporarily "/user/register?error=unknown" ctx
         }
@@ -103,6 +115,8 @@ let handleUserLogin: HttpHandler =
             let ctxf = ctx.Plug<CtxFactory>()
 
             let! form = Request.getFormSecure ctx
+            let q = Request.getQuery ctx
+            let returnUri = q.TryGetString "returnUrl"
 
             let credentials =
                 form
@@ -123,9 +137,12 @@ let handleUserLogin: HttpHandler =
                 match valid with
                 | InvalidCreds -> return! Response.redirectTemporarily "/user/login?error=invalid_creds" ctx
                 | Valid account ->
+                    let json = JsonSerializer.Serialize account
+
                     let claims =
                         [ Claim(ClaimTypes.Name, account.username)
-                          Claim(ClaimTypes.Email, account.user_email) ]
+                          Claim(ClaimTypes.Email, account.user_email)
+                          Claim(ClaimTypes.UserData, json) ]
 
                     let identity =
                         ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)
@@ -133,7 +150,8 @@ let handleUserLogin: HttpHandler =
                     let claims = ClaimsPrincipal(identity)
 
                     do! CookieSession.signIn claims ctx
-                    return! Response.redirectTemporarily "/user/account" ctx
+
+                    return! Response.redirectTemporarily (Option.defaultValue "/user/account" returnUri) ctx
         }
 
 let handleUserLogout: HttpHandler =

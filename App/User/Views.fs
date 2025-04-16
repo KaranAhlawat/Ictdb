@@ -1,6 +1,6 @@
 module App.User.Views
 
-open System.Security.Claims
+open App.Generated.Db.``public``
 open Falco.Markup
 open Falco.Security
 
@@ -28,10 +28,10 @@ let layout title content =
                 Attr.href "https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" ] ]
         content
 
-let userAccount (account: ClaimsPrincipal) =
+let userAccount acc =
     let page = "Account"
 
-    layout page [ Elem.div [] [ Text.h1 page; Elem.span [] [ Text.raw account.Identity.Name ] ] ]
+    layout page [ Elem.div [] [ Text.h1 page; Elem.span [] [ Text.raw acc.username ] ] ]
 
 let register error token =
     let page = "Register"

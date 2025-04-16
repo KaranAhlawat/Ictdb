@@ -29,6 +29,7 @@
     <Exec Command="dotnet sqlhydra npgsql" />
   </Target>
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Falco" Version="5.*" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
     <PackageReference Include="SqlHydra.Query" Version="2.8.0" />

@@ -1,10 +1,8 @@
 module App.Setup
 
-open App.User.Persistence
-open App.User.Services
+open System
 open Falco
 open App.DataSource
-open Microsoft.AspNetCore.Authentication
 open Microsoft.AspNetCore.Authentication.Cookies
 open Microsoft.AspNetCore.Builder
 open Microsoft.Extensions.Configuration
@@ -21,7 +19,11 @@ let configureApp (builder: WebApplicationBuilder) =
     builder.Services.AddSingleton<CtxFactory>(contextFactory) |> ignore
     builder.Services.AddAntiforgery() |> ignore
 
-    builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()
+    builder.Services
+        .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(fun opts ->
+            opts.Cookie.MaxAge <- TimeSpan.FromHours(1)
+            opts.LoginPath <- "/user/login")
     |> ignore
 
     let app = builder.Build()
