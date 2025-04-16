@@ -21,3 +21,14 @@ module Logger =
         match kind with
         | Named name -> factory.CreateLogger name
         | Default -> factory.CreateLogger "App.Utils.Default"
+
+[<RequireQualifiedAccess>]
+module TaskOption =
+    let traverse fn opt =
+        match opt with
+        | None -> task { return None }
+        | Some x ->
+            task {
+                let! x' = fn x
+                return Some x'
+            }

@@ -11,15 +11,13 @@ module ColumnReaders =
         member __.IsNull() = getOrdinal column |> reader.IsDBNull
         override __.ToString() = __.Name
 
-    type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>
-        (reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+    type RequiredColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
         inherit Column(reader, getOrdinal, column)
 
         member __.Read(?alias) =
             alias |> Option.defaultValue __.Name |> getOrdinal |> getter
 
-    type OptionColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>
-        (reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+    type OptionColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
         inherit Column(reader, getOrdinal, column)
 
         member __.Read(?alias) =
@@ -27,8 +25,7 @@ module ColumnReaders =
             | o when reader.IsDBNull o -> None
             | o -> Some(getter o)
 
-    type NullableObjectColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>
-        (reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+    type NullableObjectColumn<'T, 'Reader when 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
         inherit Column(reader, getOrdinal, column)
 
         member __.Read(?alias) =
@@ -36,9 +33,7 @@ module ColumnReaders =
             | o when reader.IsDBNull o -> null
             | o -> (getter o) |> unbox
 
-    type NullableValueColumn<'T, 'Reader
-        when 'T: struct and 'T: (new: unit -> 'T) and 'T :> System.ValueType and 'Reader :> System.Data.IDataReader>
-        (reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
+    type NullableValueColumn<'T, 'Reader when 'T: struct and 'T: (new: unit -> 'T) and 'T :> System.ValueType and 'Reader :> System.Data.IDataReader>(reader: 'Reader, getOrdinal, getter: int -> 'T, column) =
         inherit Column(reader, getOrdinal, column)
 
         member __.Read(?alias) =
@@ -57,16 +52,36 @@ module private DataReaderExtensions =
             reader.GetFieldValue(ordinal) |> System.TimeOnly.FromTimeSpan
 
 module ``public`` =
-    type user_origin =
+    type account_type =
         | form = 1
         | google = 2
 
     [<CLIMutable>]
-    type favorites =
+    type account =
+        { [<ProviderDbType("Uuid")>]
+          id: System.Guid
+          [<ProviderDbType("Text")>]
+          provider_id: string
+          [<ProviderDbType("Text")>]
+          username: string
+          [<ProviderDbType("Text")>]
+          user_email: string
+          [<ProviderDbType("Text")>]
+          user_password: Option<string>
+          [<ProviderDbType("TimestampTz")>]
+          created_at: System.DateTime
+          [<ProviderDbType("TimestampTz")>]
+          updated_at: System.DateTime
+          provider: account_type }
+
+    let account = table<account>
+
+    [<CLIMutable>]
+    type favorite =
         { [<ProviderDbType("Uuid")>]
           id: System.Guid
           [<ProviderDbType("Uuid")>]
-          user_id: System.Guid
+          account_id: System.Guid
           [<ProviderDbType("Uuid")>]
           talk_id: System.Guid
           [<ProviderDbType("TimestampTz")>]
@@ -74,7 +89,7 @@ module ``public`` =
           [<ProviderDbType("TimestampTz")>]
           updated_at: System.DateTime }
 
-    let favorites = table<favorites>
+    let favorite = table<favorite>
 
     [<CLIMutable>]
     type schemaversions =
@@ -88,11 +103,11 @@ module ``public`` =
     let schemaversions = table<schemaversions>
 
     [<CLIMutable>]
-    type talks =
+    type talk =
         { [<ProviderDbType("Uuid")>]
           id: System.Guid
           [<ProviderDbType("Uuid")>]
-          user_id: System.Guid
+          account_id: System.Guid
           [<ProviderDbType("Text")>]
           name: string
           [<ProviderDbType("Text")>]
@@ -110,129 +125,18 @@ module ``public`` =
           [<ProviderDbType("TimestampTz")>]
           updated_at: System.DateTime }
 
-    let talks = table<talks>
-
-    [<CLIMutable>]
-    type users =
-        { [<ProviderDbType("Uuid")>]
-          id: System.Guid
-          [<ProviderDbType("Text")>]
-          provider_id: string
-          [<ProviderDbType("Text")>]
-          username: string
-          [<ProviderDbType("Text")>]
-          user_email: string
-          [<ProviderDbType("Text")>]
-          user_password: Option<string>
-          [<ProviderDbType("TimestampTz")>]
-          created_at: System.DateTime
-          [<ProviderDbType("TimestampTz")>]
-          updated_at: System.DateTime
-          provider: user_origin }
-
-    let users = table<users>
+    let talk = table<talk>
 
     module Readers =
-        type favoritesReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+        type accountReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
             member __.id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "id")
-            member __.user_id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "user_id")
-            member __.talk_id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "talk_id")
-
-            member __.created_at =
-                RequiredColumn(reader, getOrdinal, reader.GetDateTime, "created_at")
-
-            member __.updated_at =
-                RequiredColumn(reader, getOrdinal, reader.GetDateTime, "updated_at")
-
-            member __.Read() =
-                { id = __.id.Read()
-                  user_id = __.user_id.Read()
-                  talk_id = __.talk_id.Read()
-                  created_at = __.created_at.Read()
-                  updated_at = __.updated_at.Read() }
-                : favorites
-
-            member __.ReadIfNotNull() =
-                if __.id.IsNull() then None else Some(__.Read())
-
-        type schemaversionsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-            member __.schemaversionsid =
-                RequiredColumn(reader, getOrdinal, reader.GetInt32, "schemaversionsid")
-
-            member __.scriptname =
-                RequiredColumn(reader, getOrdinal, reader.GetString, "scriptname")
-
-            member __.applied = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "applied")
-
-            member __.Read() =
-                { schemaversionsid = __.schemaversionsid.Read()
-                  scriptname = __.scriptname.Read()
-                  applied = __.applied.Read() }
-                : schemaversions
-
-            member __.ReadIfNotNull() =
-                if __.schemaversionsid.IsNull() then
-                    None
-                else
-                    Some(__.Read())
-
-        type talksReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-            member __.id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "id")
-            member __.user_id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "user_id")
-            member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
-            member __.link = RequiredColumn(reader, getOrdinal, reader.GetString, "link")
-
-            member __.description =
-                OptionColumn(reader, getOrdinal, reader.GetString, "description")
-
-            member __.speaker = OptionColumn(reader, getOrdinal, reader.GetString, "speaker")
-            member __.organizer = OptionColumn(reader, getOrdinal, reader.GetString, "organizer")
-            member __.tags = OptionColumn(reader, getOrdinal, reader.GetFieldValue, "tags")
-
-            member __.created_at =
-                RequiredColumn(reader, getOrdinal, reader.GetDateTime, "created_at")
-
-            member __.updated_at =
-                RequiredColumn(reader, getOrdinal, reader.GetDateTime, "updated_at")
-
-            member __.Read() =
-                { id = __.id.Read()
-                  user_id = __.user_id.Read()
-                  name = __.name.Read()
-                  link = __.link.Read()
-                  description = __.description.Read()
-                  speaker = __.speaker.Read()
-                  organizer = __.organizer.Read()
-                  tags = __.tags.Read()
-                  created_at = __.created_at.Read()
-                  updated_at = __.updated_at.Read() }
-                : talks
-
-            member __.ReadIfNotNull() =
-                if __.id.IsNull() then None else Some(__.Read())
-
-        type usersReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
-            member __.id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "id")
-
-            member __.provider_id =
-                RequiredColumn(reader, getOrdinal, reader.GetString, "provider_id")
-
+            member __.provider_id = RequiredColumn(reader, getOrdinal, reader.GetString, "provider_id")
             member __.username = RequiredColumn(reader, getOrdinal, reader.GetString, "username")
-
-            member __.user_email =
-                RequiredColumn(reader, getOrdinal, reader.GetString, "user_email")
-
-            member __.user_password =
-                OptionColumn(reader, getOrdinal, reader.GetString, "user_password")
-
-            member __.created_at =
-                RequiredColumn(reader, getOrdinal, reader.GetDateTime, "created_at")
-
-            member __.updated_at =
-                RequiredColumn(reader, getOrdinal, reader.GetDateTime, "updated_at")
-
-            member __.provider =
-                RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "provider")
+            member __.user_email = RequiredColumn(reader, getOrdinal, reader.GetString, "user_email")
+            member __.user_password = OptionColumn(reader, getOrdinal, reader.GetString, "user_password")
+            member __.created_at = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "created_at")
+            member __.updated_at = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "updated_at")
+            member __.provider = RequiredColumn(reader, getOrdinal, reader.GetFieldValue, "provider")
 
             member __.Read() =
                 { id = __.id.Read()
@@ -243,7 +147,67 @@ module ``public`` =
                   created_at = __.created_at.Read()
                   updated_at = __.updated_at.Read()
                   provider = __.provider.Read() }
-                : users
+                : account
+
+            member __.ReadIfNotNull() =
+                if __.id.IsNull() then None else Some(__.Read())
+
+        type favoriteReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+            member __.id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "id")
+            member __.account_id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "account_id")
+            member __.talk_id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "talk_id")
+            member __.created_at = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "created_at")
+            member __.updated_at = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "updated_at")
+
+            member __.Read() =
+                { id = __.id.Read()
+                  account_id = __.account_id.Read()
+                  talk_id = __.talk_id.Read()
+                  created_at = __.created_at.Read()
+                  updated_at = __.updated_at.Read() }
+                : favorite
+
+            member __.ReadIfNotNull() =
+                if __.id.IsNull() then None else Some(__.Read())
+
+        type schemaversionsReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+            member __.schemaversionsid = RequiredColumn(reader, getOrdinal, reader.GetInt32, "schemaversionsid")
+            member __.scriptname = RequiredColumn(reader, getOrdinal, reader.GetString, "scriptname")
+            member __.applied = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "applied")
+
+            member __.Read() =
+                { schemaversionsid = __.schemaversionsid.Read()
+                  scriptname = __.scriptname.Read()
+                  applied = __.applied.Read() }
+                : schemaversions
+
+            member __.ReadIfNotNull() =
+                if __.schemaversionsid.IsNull() then None else Some(__.Read())
+
+        type talkReader(reader: Npgsql.NpgsqlDataReader, getOrdinal) =
+            member __.id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "id")
+            member __.account_id = RequiredColumn(reader, getOrdinal, reader.GetGuid, "account_id")
+            member __.name = RequiredColumn(reader, getOrdinal, reader.GetString, "name")
+            member __.link = RequiredColumn(reader, getOrdinal, reader.GetString, "link")
+            member __.description = OptionColumn(reader, getOrdinal, reader.GetString, "description")
+            member __.speaker = OptionColumn(reader, getOrdinal, reader.GetString, "speaker")
+            member __.organizer = OptionColumn(reader, getOrdinal, reader.GetString, "organizer")
+            member __.tags = OptionColumn(reader, getOrdinal, reader.GetFieldValue, "tags")
+            member __.created_at = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "created_at")
+            member __.updated_at = RequiredColumn(reader, getOrdinal, reader.GetDateTime, "updated_at")
+
+            member __.Read() =
+                { id = __.id.Read()
+                  account_id = __.account_id.Read()
+                  name = __.name.Read()
+                  link = __.link.Read()
+                  description = __.description.Read()
+                  speaker = __.speaker.Read()
+                  organizer = __.organizer.Read()
+                  tags = __.tags.Read()
+                  created_at = __.created_at.Read()
+                  updated_at = __.updated_at.Read() }
+                : talk
 
             member __.ReadIfNotNull() =
                 if __.id.IsNull() then None else Some(__.Read())
@@ -253,8 +217,7 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
     let mutable accFieldCount = 0
 
     let buildGetOrdinal tableType =
-        let fieldNames =
-            FSharp.Reflection.FSharpType.GetRecordFields(tableType) |> Array.map _.Name
+        let fieldNames = FSharp.Reflection.FSharpType.GetRecordFields(tableType) |> Array.map _.Name
 
         let dictionary =
             [| 0 .. reader.FieldCount - 1 |]
@@ -268,17 +231,10 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         accFieldCount <- accFieldCount + fieldNames.Length
         fun col -> dictionary.Item col
 
-    member __.``public.favorites`` =
-        ``public``.Readers.favoritesReader (reader, buildGetOrdinal typeof<``public``.favorites>)
-
-    member __.``public.schemaversions`` =
-        ``public``.Readers.schemaversionsReader (reader, buildGetOrdinal typeof<``public``.schemaversions>)
-
-    member __.``public.talks`` =
-        ``public``.Readers.talksReader (reader, buildGetOrdinal typeof<``public``.talks>)
-
-    member __.``public.users`` =
-        ``public``.Readers.usersReader (reader, buildGetOrdinal typeof<``public``.users>)
+    member __.``public.account`` = ``public``.Readers.accountReader (reader, buildGetOrdinal typeof<``public``.account>)
+    member __.``public.favorite`` = ``public``.Readers.favoriteReader (reader, buildGetOrdinal typeof<``public``.favorite>)
+    member __.``public.schemaversions`` = ``public``.Readers.schemaversionsReader (reader, buildGetOrdinal typeof<``public``.schemaversions>)
+    member __.``public.talk`` = ``public``.Readers.talkReader (reader, buildGetOrdinal typeof<``public``.talk>)
 
     member private __.AccFieldCount
         with get () = accFieldCount
@@ -286,102 +242,62 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
 
     member private __.GetReaderByName(entity: string, isOption: bool) =
         match entity, isOption with
-        | "public.favorites", false -> __.``public.favorites``.Read >> box
-        | "public.favorites", true -> __.``public.favorites``.ReadIfNotNull >> box
+        | "public.account", false -> __.``public.account``.Read >> box
+        | "public.account", true -> __.``public.account``.ReadIfNotNull >> box
+        | "public.favorite", false -> __.``public.favorite``.Read >> box
+        | "public.favorite", true -> __.``public.favorite``.ReadIfNotNull >> box
         | "public.schemaversions", false -> __.``public.schemaversions``.Read >> box
         | "public.schemaversions", true -> __.``public.schemaversions``.ReadIfNotNull >> box
-        | "public.talks", false -> __.``public.talks``.Read >> box
-        | "public.talks", true -> __.``public.talks``.ReadIfNotNull >> box
-        | "public.users", false -> __.``public.users``.Read >> box
-        | "public.users", true -> __.``public.users``.ReadIfNotNull >> box
+        | "public.talk", false -> __.``public.talk``.Read >> box
+        | "public.talk", true -> __.``public.talk``.ReadIfNotNull >> box
         | _ -> failwith $"Could not read type '{entity}' because no generated reader exists."
 
-    static member private GetPrimitiveReader
-        (t: System.Type, reader: Npgsql.NpgsqlDataReader, isOpt: bool, isNullable: bool)
-        =
+    static member private GetPrimitiveReader(t: System.Type, reader: Npgsql.NpgsqlDataReader, isOpt: bool, isNullable: bool) =
 
         let wrapValue get (ord: int) =
             if isOpt then
                 (if reader.IsDBNull ord then None else get ord |> Some) |> box
             elif isNullable then
-                (if reader.IsDBNull ord then
-                     System.Nullable()
-                 else
-                     get ord |> System.Nullable)
+                (if reader.IsDBNull ord then System.Nullable() else get ord |> System.Nullable)
                 |> box
             else
                 get ord |> box
 
         let wrapRef get (ord: int) =
-            if isOpt then
-                (if reader.IsDBNull ord then None else get ord |> Some) |> box
-            else
-                get ord |> box
+            if isOpt then (if reader.IsDBNull ord then None else get ord |> Some) |> box else get ord |> box
 
-        if t = typedefof<bool> then
-            Some(wrapValue reader.GetBoolean)
-        elif t = typedefof<bool[]> then
-            Some(wrapRef reader.GetFieldValue<bool[]>)
-        elif t = typedefof<int16> then
-            Some(wrapValue reader.GetInt16)
-        elif t = typedefof<int16[]> then
-            Some(wrapRef reader.GetFieldValue<int16[]>)
-        elif t = typedefof<int> then
-            Some(wrapValue reader.GetInt32)
-        elif t = typedefof<int[]> then
-            Some(wrapRef reader.GetFieldValue<int[]>)
-        elif t = typedefof<int64> then
-            Some(wrapValue reader.GetInt64)
-        elif t = typedefof<int64[]> then
-            Some(wrapRef reader.GetFieldValue<int64[]>)
-        elif t = typedefof<double> then
-            Some(wrapValue reader.GetDouble)
-        elif t = typedefof<double[]> then
-            Some(wrapRef reader.GetFieldValue<double[]>)
-        elif t = typedefof<decimal> then
-            Some(wrapValue reader.GetDecimal)
-        elif t = typedefof<decimal[]> then
-            Some(wrapRef reader.GetFieldValue<decimal[]>)
-        elif t = typedefof<string> then
-            Some(wrapRef reader.GetString)
-        elif t = typedefof<string[]> then
-            Some(wrapRef reader.GetFieldValue<string[]>)
-        elif t = typedefof<System.Guid> then
-            Some(wrapValue reader.GetGuid)
-        elif t = typedefof<System.Guid[]> then
-            Some(wrapRef reader.GetFieldValue<System.Guid[]>)
-        elif t = typedefof<System.TimeSpan> then
-            Some(wrapRef reader.GetTimeSpan)
-        elif t = typedefof<System.TimeSpan[]> then
-            Some(wrapRef reader.GetFieldValue<System.TimeSpan[]>)
-        elif t = typedefof<System.DateOnly> then
-            Some(wrapValue reader.GetDateOnly)
-        elif t = typedefof<System.DateOnly[]> then
-            Some(wrapRef reader.GetFieldValue<System.DateOnly[]>)
-        elif t = typedefof<System.TimeOnly> then
-            Some(wrapValue reader.GetTimeOnly)
-        elif t = typedefof<System.TimeOnly[]> then
-            Some(wrapRef reader.GetFieldValue<System.TimeOnly[]>)
-        elif t = typedefof<System.DateTime> then
-            Some(wrapValue reader.GetDateTime)
-        elif t = typedefof<System.DateTime[]> then
-            Some(wrapRef reader.GetFieldValue<System.DateTime[]>)
-        elif t = typedefof<System.DateTimeOffset> then
-            Some(wrapValue reader.GetDateTime)
-        elif t = typedefof<System.DateTimeOffset[]> then
-            Some(wrapRef reader.GetFieldValue<System.DateTimeOffset[]>)
-        elif t = typedefof<byte[]> then
-            Some(wrapRef reader.GetFieldValue<byte[]>)
-        elif t = typedefof<char> then
-            Some(wrapRef reader.GetChar)
-        elif t = typedefof<char[]> then
-            Some(wrapRef reader.GetFieldValue<char[]>)
-        elif t = typedefof<float> then
-            Some(wrapRef reader.GetFloat)
-        elif t = typedefof<float[]> then
-            Some(wrapRef reader.GetFieldValue<float[]>)
-        else
-            None
+        if t = typedefof<bool> then Some(wrapValue reader.GetBoolean)
+        elif t = typedefof<bool[]> then Some(wrapRef reader.GetFieldValue<bool[]>)
+        elif t = typedefof<int16> then Some(wrapValue reader.GetInt16)
+        elif t = typedefof<int16[]> then Some(wrapRef reader.GetFieldValue<int16[]>)
+        elif t = typedefof<int> then Some(wrapValue reader.GetInt32)
+        elif t = typedefof<int[]> then Some(wrapRef reader.GetFieldValue<int[]>)
+        elif t = typedefof<int64> then Some(wrapValue reader.GetInt64)
+        elif t = typedefof<int64[]> then Some(wrapRef reader.GetFieldValue<int64[]>)
+        elif t = typedefof<double> then Some(wrapValue reader.GetDouble)
+        elif t = typedefof<double[]> then Some(wrapRef reader.GetFieldValue<double[]>)
+        elif t = typedefof<decimal> then Some(wrapValue reader.GetDecimal)
+        elif t = typedefof<decimal[]> then Some(wrapRef reader.GetFieldValue<decimal[]>)
+        elif t = typedefof<string> then Some(wrapRef reader.GetString)
+        elif t = typedefof<string[]> then Some(wrapRef reader.GetFieldValue<string[]>)
+        elif t = typedefof<System.Guid> then Some(wrapValue reader.GetGuid)
+        elif t = typedefof<System.Guid[]> then Some(wrapRef reader.GetFieldValue<System.Guid[]>)
+        elif t = typedefof<System.TimeSpan> then Some(wrapRef reader.GetTimeSpan)
+        elif t = typedefof<System.TimeSpan[]> then Some(wrapRef reader.GetFieldValue<System.TimeSpan[]>)
+        elif t = typedefof<System.DateOnly> then Some(wrapValue reader.GetDateOnly)
+        elif t = typedefof<System.DateOnly[]> then Some(wrapRef reader.GetFieldValue<System.DateOnly[]>)
+        elif t = typedefof<System.TimeOnly> then Some(wrapValue reader.GetTimeOnly)
+        elif t = typedefof<System.TimeOnly[]> then Some(wrapRef reader.GetFieldValue<System.TimeOnly[]>)
+        elif t = typedefof<System.DateTime> then Some(wrapValue reader.GetDateTime)
+        elif t = typedefof<System.DateTime[]> then Some(wrapRef reader.GetFieldValue<System.DateTime[]>)
+        elif t = typedefof<System.DateTimeOffset> then Some(wrapValue reader.GetDateTime)
+        elif t = typedefof<System.DateTimeOffset[]> then Some(wrapRef reader.GetFieldValue<System.DateTimeOffset[]>)
+        elif t = typedefof<byte[]> then Some(wrapRef reader.GetFieldValue<byte[]>)
+        elif t = typedefof<char> then Some(wrapRef reader.GetChar)
+        elif t = typedefof<char[]> then Some(wrapRef reader.GetFieldValue<char[]>)
+        elif t = typedefof<float> then Some(wrapRef reader.GetFloat)
+        elif t = typedefof<float[]> then Some(wrapRef reader.GetFieldValue<float[]>)
+        else None
 
     static member Read(reader: Npgsql.NpgsqlDataReader) =
         let hydra = HydraReader(reader)
@@ -394,12 +310,9 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
 
         let buildEntityReadFn (t: System.Type) =
             let t, isOpt, isNullable =
-                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then
-                    t.GenericTypeArguments[0], true, false
-                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then
-                    t.GenericTypeArguments[0], false, true
-                else
-                    t, false, false
+                if t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<Option<_>> then t.GenericTypeArguments[0], true, false
+                elif t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<System.Nullable<_>> then t.GenericTypeArguments[0], false, true
+                else t, false, false
 
             match HydraReader.GetPrimitiveReader(t, reader, isOpt, isNullable) with
             | Some primitiveReader ->
@@ -423,8 +336,7 @@ type HydraReader(reader: Npgsql.NpgsqlDataReader) =
         let t = typeof<'T>
 
         if FSharp.Reflection.FSharpType.IsTuple(t) then
-            let readEntityFns =
-                FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
+            let readEntityFns = FSharp.Reflection.FSharpType.GetTupleElements(t) |> Array.map buildEntityReadFn
 
             fun () ->
                 let entities = readEntityFns |> Array.map (fun read -> read ())

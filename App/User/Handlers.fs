@@ -1,66 +1,91 @@
 module App.User.Handlers
 
 open System
-open System.Threading.Tasks
+open App.DataSource
+open App.User.Persistence
+open App.User.Services
 open App.Utils
 open Falco
 
 open App.Generated.Db.``public``
-open Microsoft.Extensions.Logging
 
-type private UserRegistrationRequest = { Username: string; Password: string }
+let handleRegisterView: HttpHandler =
+    Request.mapQuery
+        (fun q ->
+            let error = q.TryGetString "error"
+            Views.register error)
+        Response.ofHtmlCsrf
 
-let private handleInvalid: HttpHandler =
-    Response.withStatusCode 400 >> Response.ofEmpty
+let handleLoginView: HttpHandler =
+    Request.mapQuery
+        (fun q ->
+            let error = q.TryGetString "error"
+            Views.login error)
+        Response.ofHtmlCsrf
 
-let handleRegisterView: HttpHandler = Response.ofHtmlCsrf Views.register
-
-let handleLoginView: HttpHandler = Response.ofHtmlCsrf Views.login
-
-let handleUserRegistration registerUser : HttpHandler =
+let handleUserRegistration: HttpHandler =
     fun ctx ->
         task {
+            let ctxf = ctx.Plug<CtxFactory>()
+
             let! form = Request.getFormSecure ctx
 
             let user =
                 form
+                |> Option.bind (fun f ->
+                    let username = f.GetString "username"
+                    let email = f.GetString "email"
+                    let password = f.GetString "password"
+                    let confirmPass = f.GetString "confirm-password"
+
+                    let confirmed =
+                        String.Compare(password, confirmPass, StringComparison.OrdinalIgnoreCase)
+
+                    if confirmed <> 0 then
+                        None
+                    else
+                        Some
+                            { id = Guid()
+                              provider_id = DateTime.UtcNow.ToString("o")
+                              username = username
+                              user_email = email
+                              user_password = Some password
+                              provider = account_type.form
+                              created_at = DateTime.UtcNow
+                              updated_at = DateTime.UtcNow })
+
+            let! id = user |> TaskOption.traverse (UserRepo.Live.Add ctxf)
+
+            match id with
+            | Some id -> return! Response.ofJson id ctx
+            | None -> return! Response.redirectTemporarily "/user/register?error=unknown" ctx
+        }
+
+let handleUserLogin: HttpHandler =
+    fun ctx ->
+        task {
+            let ctxf = ctx.Plug<CtxFactory>()
+
+            let! form = Request.getFormSecure ctx
+
+            let credentials =
+                form
                 |> Option.map (fun f ->
+
                     let username = f.GetString "username"
                     let password = f.GetString "password"
 
-                    { id = Guid()
-                      provider_id = "ok"
-                      username = username
-                      user_email = username
-                      user_password = Some password
-                      provider = user_origin.form
-                      created_at = DateTime.UtcNow
-                      updated_at = DateTime.UtcNow })
+                    { Username = username
+                      Password = password })
 
-            let guidTask = Option.map registerUser user
+            match credentials with
+            | None -> return! Response.redirectTemporarily "/user/login" ctx
+            | Some credentials ->
+                let! user = UserRepo.Live.OfUsername ctxf credentials.Username
+                let valid = UserService.ValidateCredentials user credentials
 
-            match guidTask with
-            | None -> return! handleInvalid ctx
-            | Some idTask ->
-                let! id = idTask
-                return! Response.ofJson id ctx
-        }
-
-let handleUserLogin (findUser: Guid -> users option Task) : HttpHandler =
-    fun ctx ->
-        let id = "ac07881a-6851-44fa-af3f-dea3e9437d8a"
-        let logger = ctx |> Logger.get (Logger.Named "handleUserLogin")
-
-        task {
-            logger.LogInformation("Finding user for ID {ID}", id)
-
-            let! user = Guid.Parse id |> findUser
-
-            logger.LogInformation("Found {User}", user)
-
-            return!
-                (match user with
-                 | None -> handleInvalid
-                 | Some value -> Response.ofJson value)
-                    ctx
+                return!
+                    match valid with
+                    | InvalidCreds -> Response.redirectTemporarily "/user/login?error=invalid_creds" ctx
+                    | Valid value -> Response.ofJson value ctx
         }

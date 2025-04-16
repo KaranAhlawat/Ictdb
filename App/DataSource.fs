@@ -11,7 +11,7 @@ module NpgsqlCtxFactory =
     let make connString : CtxFactory =
         let dataSource =
             let builder = NpgsqlDataSourceBuilder(connString)
-            builder.MapEnum<user_origin>("public.user_origin") |> ignore
+            builder.MapEnum<account_type>("public.account_type") |> ignore
             builder.Build()
 
         let compiler = SqlKata.Compilers.PostgresCompiler()

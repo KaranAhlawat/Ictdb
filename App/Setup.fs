@@ -10,15 +10,13 @@ open Microsoft.Extensions.DependencyInjection
 
 let configureApp (builder: WebApplicationBuilder) =
 
+    // Configure services, repositories, any other infra and endpoints
     let connString = builder.Configuration.GetConnectionString "Docker"
 
-    let ctxf = NpgsqlCtxFactory.make connString
+    let contextFactory = NpgsqlCtxFactory.make connString
 
-    let userRepo = UserRepo.Live.mk ctxf
-    let userService = UserService.Live.mk userRepo
-
-    let endpoints = Endpoints.all userService
-
+    // Add any ASP.NET stuff
+    builder.Services.AddSingleton<CtxFactory>(contextFactory) |> ignore
     builder.Services.AddAntiforgery() |> ignore
 
     let app = builder.Build()
@@ -26,6 +24,6 @@ let configureApp (builder: WebApplicationBuilder) =
     app.UseHttpsRedirection() |> ignore
     app.UseAntiforgery() |> ignore
     app.UseRouting() |> ignore
-    app.UseFalco(endpoints) |> ignore
+    app.UseFalco(Endpoints.all) |> ignore
 
     app

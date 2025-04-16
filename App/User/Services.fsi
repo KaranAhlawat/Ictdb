@@ -8,8 +8,6 @@ type ValidationResult =
     | InvalidCreds
     | Valid of account
 
+[<RequireQualifiedAccess>]
 module UserService =
-    let ValidateCredentials user creds : ValidationResult =
-        match user with
-        | Some u when u.user_password = Some creds.Password -> Valid u
-        | _ -> InvalidCreds
+    val ValidateCredentials: account option -> Credentials -> ValidationResult

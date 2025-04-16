@@ -1,54 +1,54 @@
 module App.User.Persistence
 
-open System
-open System.Threading.Tasks
 open App.DataSource
 
 open SqlHydra.Query
 open App.Generated.Db.``public``
 open App.Generated.Db.HydraBuilders
 
-type UserRepo =
-    { add: users -> Guid Task
-      whereId: Guid -> users option Task
-      remove: Guid -> bool Task }
-
 module UserRepo =
     module Live =
-        let mk (f: CtxFactory) =
-            { add =
-                fun user ->
-                    task {
-                        return!
-                            insertTask f.openCtx {
-                                for u in users do
-                                    entity user
-                                    getId u.id
-                                    excludeColumn u.created_at
-                                    excludeColumn u.updated_at
-                            }
+        let Add ctxf details =
+            task {
+                return!
+                    insertTask ctxf.openCtx {
+                        for a in account do
+                            entity details
+                            getId a.id
+                            excludeColumn a.created_at
+                            excludeColumn a.updated_at
+                    }
+            }
+
+        let OfId ctxf id =
+            task {
+                return!
+                    selectTask ctxf.openCtx {
+                        for a in account do
+                            where (a.id = id)
+                            select a
+                            tryHead
+                    }
+            }
+
+        let OfUsername ctxf username =
+            task {
+                return!
+                    selectTask ctxf.openCtx {
+                        for a in account do
+                            where (a.username = username)
+                            select a
+                            tryHead
+                    }
+            }
+
+        let Remove ctxf id =
+            task {
+                let! count =
+                    deleteTask ctxf.openCtx {
+                        for a in account do
+                            where (a.id = id)
                     }
 
-              whereId =
-                fun id ->
-                    task {
-                        return!
-                            selectTask f.openCtx {
-                                for u in users do
-                                    where (u.id = id)
-                                    select u
-                                    tryHead
-                            }
-                    }
-
-              remove =
-                fun id ->
-                    task {
-                        let! count =
-                            deleteTask f.openCtx {
-                                for u in users do
-                                    where (u.id = id)
-                            }
-
-                        return count = 1
-                    } }
+                return count = 1
+            }
