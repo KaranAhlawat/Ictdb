@@ -8,6 +8,7 @@
       <Visible>False</Visible>
     </Compile>
     <Compile Include="Utils.fs" />
+    <Compile Include="Authentication.fs" />
     <Compile Include="DataSource.fs" />
     <Compile Include="User\Persistence.fsi" />
     <Compile Include="User\Persistence.fs" />

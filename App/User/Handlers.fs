@@ -1,6 +1,9 @@
 module App.User.Handlers
 
 open System
+open System.Net
+open System.Security.Claims
+open App.Authentication
 open App.DataSource
 open App.User.Persistence
 open App.User.Services
@@ -8,25 +11,41 @@ open App.Utils
 open Falco
 
 open App.Generated.Db.``public``
+open Microsoft.AspNetCore.Authentication.Cookies
 
 let handleRegisterView: HttpHandler =
-    Request.mapQuery
-        (fun q ->
-            let error = q.TryGetString "error"
-            Views.register error)
-        Response.ofHtmlCsrf
+    CookieSession.authenticate (fun result ->
+        if result.Succeeded then
+            Response.redirectTemporarily "/user/account"
+        else
+            (Request.mapQuery
+                (fun q ->
+                    let error = q.TryGetString "error"
+                    Views.register error)
+                Response.ofHtmlCsrf))
 
 let handleLoginView: HttpHandler =
-    Request.mapQuery
-        (fun q ->
-            let error = q.TryGetString "error"
-            Views.login error)
-        Response.ofHtmlCsrf
+    CookieSession.authenticate (fun result ->
+        if result.Succeeded then
+            Response.redirectTemporarily "/user/account"
+        else
+            Request.mapQuery
+                (fun q ->
+                    let error = q.TryGetString "error"
+                    Views.login error)
+                Response.ofHtmlCsrf)
+
+let handleAccountView: HttpHandler =
+    CookieSession.authenticate (fun result ->
+        if result.Succeeded then
+            Response.ofHtml (Views.userAccount result.Principal)
+        else
+            CookieSession.challengeTo "/user/account")
 
 let handleUserRegistration: HttpHandler =
     fun ctx ->
         task {
-            let ctxf = ctx.Plug<CtxFactory>()
+            let ctxFactory = ctx.Plug<CtxFactory>()
 
             let! form = Request.getFormSecure ctx
 
@@ -54,10 +73,27 @@ let handleUserRegistration: HttpHandler =
                               created_at = DateTime.UtcNow
                               updated_at = DateTime.UtcNow })
 
-            let! id = user |> TaskOption.traverse (UserRepo.Live.Add ctxf)
+            let! account =
+                user
+                |> TaskOption.traverse (fun u ->
+                    task {
+                        let! _ = UserRepo.Live.Add ctxFactory u
+                        return u
+                    })
 
-            match id with
-            | Some id -> return! Response.ofJson id ctx
+            match account with
+            | Some account ->
+                let claims =
+                    [ Claim(ClaimTypes.Name, account.username)
+                      Claim(ClaimTypes.Email, account.user_email) ]
+
+                let identity =
+                    ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)
+
+                let claims = ClaimsPrincipal(identity)
+
+                do! CookieSession.signIn claims ctx
+                return! Response.redirectTemporarily "/user/account" ctx
             | None -> return! Response.redirectTemporarily "/user/register?error=unknown" ctx
         }
 
@@ -84,8 +120,29 @@ let handleUserLogin: HttpHandler =
                 let! user = UserRepo.Live.OfUsername ctxf credentials.Username
                 let valid = UserService.ValidateCredentials user credentials
 
-                return!
-                    match valid with
-                    | InvalidCreds -> Response.redirectTemporarily "/user/login?error=invalid_creds" ctx
-                    | Valid value -> Response.ofJson value ctx
+                match valid with
+                | InvalidCreds -> return! Response.redirectTemporarily "/user/login?error=invalid_creds" ctx
+                | Valid account ->
+                    let claims =
+                        [ Claim(ClaimTypes.Name, account.username)
+                          Claim(ClaimTypes.Email, account.user_email) ]
+
+                    let identity =
+                        ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)
+
+                    let claims = ClaimsPrincipal(identity)
+
+                    do! CookieSession.signIn claims ctx
+                    return! Response.redirectTemporarily "/user/account" ctx
         }
+
+let handleUserLogout: HttpHandler =
+    Request.authenticate CookieAuthenticationDefaults.AuthenticationScheme (fun result ctx ->
+        task {
+            if result.Succeeded then
+                do! CookieSession.signOut ctx
+            else
+                ()
+
+            return! Response.redirectTemporarily "/user/login" ctx
+        })
