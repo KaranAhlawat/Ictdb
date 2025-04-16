@@ -10,4 +10,4 @@ type ValidationResult =
 
 [<RequireQualifiedAccess>]
 module UserService =
-    val ValidateCredentials: account option -> Credentials -> ValidationResult
+    val ValidateCredentials: (string * string -> bool) -> account option -> Credentials -> ValidationResult

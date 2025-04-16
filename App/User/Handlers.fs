@@ -1,7 +1,6 @@
 module App.User.Handlers
 
 open System
-open System.Linq
 open System.Security.Claims
 open System.Text.Json
 open App.Authentication
@@ -132,7 +131,7 @@ let handleUserLogin: HttpHandler =
             | None -> return! Response.redirectTemporarily "/user/login" ctx
             | Some credentials ->
                 let! user = UserRepo.Live.OfUsername ctxf credentials.Username
-                let valid = UserService.ValidateCredentials user credentials
+                let valid = UserService.ValidateCredentials BCrypt.EnhancedVerify user credentials
 
                 match valid with
                 | InvalidCreds -> return! Response.redirectTemporarily "/user/login?error=invalid_creds" ctx
