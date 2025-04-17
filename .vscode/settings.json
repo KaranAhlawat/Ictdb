@@ -1,0 +1,9 @@
+{
+	"[fsharp]": {
+		"diffEditor.ignoreTrimWhitespace": false,
+		"editor.detectIndentation": false,
+		"editor.tabSize": 4,
+		"editor.indentSize": "tabSize",
+		"editor.insertSpaces": true
+	}
+}
