@@ -28,7 +28,9 @@ let handleCreateNewTalk save : HttpHandler =
 
                     acc
                     |> Option.map (fun a ->
-                        { id = Guid()
+                        printfn $"Account is: {a}"
+
+                        { id = Guid.Empty
                           account_id = a.id
                           name = title
                           link = link
@@ -40,8 +42,8 @@ let handleCreateNewTalk save : HttpHandler =
                           updated_at = DateTime.Now }))
                 |> TaskOption.traverse (fun t ->
                     task {
-                        let! _ = save t
-                        return t
+                        let! id = save t
+                        return { t with id = id }
                     })
 
             match res with

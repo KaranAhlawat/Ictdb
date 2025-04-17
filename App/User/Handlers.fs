@@ -64,7 +64,7 @@ let handleUserRegistration save hasher : HttpHandler =
                         let hashedPass = hasher password
 
                         Some
-                            { id = Guid()
+                            { id = Guid.Empty
                               provider_id = DateTime.UtcNow.ToString "o"
                               username = username
                               user_email = email
@@ -77,8 +77,8 @@ let handleUserRegistration save hasher : HttpHandler =
                 user
                 |> TaskOption.traverse (fun u ->
                     task {
-                        let! _ = save u
-                        return u
+                        let! id = save u
+                        return { u with id = id }
                     })
 
             match account with

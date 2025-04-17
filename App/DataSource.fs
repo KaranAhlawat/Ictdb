@@ -20,8 +20,12 @@ module NpgsqlCtxFactory =
             task {
                 let! conn = dataSource.OpenConnectionAsync()
 
-                return new QueryContext(conn, compiler)
+                let ctx = new QueryContext(conn, compiler)
+#if DEBUG
+                ctx.Logger <- printfn "SQL: %O"
+#endif
 
+                return ctx
             }
 
         { openCtx = openCtx }

@@ -3,13 +3,13 @@ services:
     image: postgres:latest
     ports:
       - "5432:5432"
-    # volumes:
-    #   - ict_dev_data:/var/lib/postgresql/data
+    volumes:
+      - ict_dev_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=ictdb
       - POSTGRES_PASSWORD=ictdbpwd
       - POSTGRES_DB=ictdb
     restart: unless-stopped
-#
-# volumes:
-#   ict_dev_data:
+
+volumes:
+  ict_dev_data:
