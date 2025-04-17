@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{E65CB1CE-335C-494C-8C1D-2D2274F6FF5B}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+	EndProjectSection
+EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "App", "App\App.fsproj", "{52915E57-04D3-4BBA-9E73-207599E5455B}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Migrations", "Migrations\Migrations.fsproj", "{34A289E2-DA2A-426F-97FC-5B884B98701C}"

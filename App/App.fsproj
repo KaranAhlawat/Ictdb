@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -28,10 +29,5 @@
   <Target Name="SqlHydra" BeforeTargets="Clean" Condition="'$(Configuration)' == 'Debug'">
     <Exec Command="dotnet sqlhydra npgsql" />
   </Target>
-  <ItemGroup>
-    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-    <PackageReference Include="Falco" Version="5.*" />
-    <PackageReference Include="Npgsql" Version="9.0.3" />
-    <PackageReference Include="SqlHydra.Query" Version="2.8.0" />
-  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
