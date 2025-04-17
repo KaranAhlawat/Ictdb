@@ -1,6 +1,7 @@
 module App.User.Views
 
 open App.Generated.Db.``public``
+open App.ViewHelpers
 open Falco.Markup
 open Falco.Security
 
@@ -19,24 +20,15 @@ module Errors =
         | InvalidCredentials -> "Invalid credentials"
         | Unknown -> "Something went wrong"
 
-let layout title content =
-    Templates.html5
-        "en-us"
-        [ Elem.title [] [ Text.raw title ]
-          Elem.link
-              [ Attr.rel "stylesheet"
-                Attr.href "https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" ] ]
-        content
-
 let userAccount acc =
     let page = "Account"
 
-    layout page [ Elem.div [] [ Text.h1 page; Elem.span [] [ Text.raw acc.username ] ] ]
+    Layouts.root page [ Elem.div [] [ Text.h1 page; Elem.span [] [ Text.raw acc.username ] ] ]
 
 let register error token =
     let page = "Register"
 
-    layout
+    Layouts.root
         page
         [ Elem.div
               []
@@ -78,4 +70,4 @@ let login error token =
                     Elem.input [ Attr.id "password"; Attr.name "password"; Attr.typePassword ] ]
               Elem.button [ Attr.typeSubmit ] [ Text.raw "Login" ] ]
 
-    layout page [ Elem.div [] [ Text.h1 page; Elem.form [ Attr.methodPost ] formBody ] ]
+    Layouts.root page [ Elem.div [] [ Text.h1 page; Elem.form [ Attr.methodPost ] formBody ] ]

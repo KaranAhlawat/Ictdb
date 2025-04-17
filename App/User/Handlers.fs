@@ -3,6 +3,7 @@ module App.User.Handlers
 open System
 open System.Security.Claims
 open System.Text.Json
+open System.Threading.Tasks
 open App.Authentication
 open App.User.Services
 open App.Utils
@@ -12,39 +13,36 @@ open App.Generated.Db.``public``
 open Microsoft.AspNetCore.Authentication.Cookies
 
 let handleRegisterView: HttpHandler =
-    CookieSession.authenticate (fun result ->
-        if result.Succeeded then
-            Response.redirectTemporarily "/user/account"
-        else
-            Request.mapQuery
-                (fun q ->
-                    let error = q.TryGetString "error"
-                    Views.register error)
-                Response.ofHtmlCsrf)
+    let proceed =
+        Request.mapQuery
+            (fun q ->
+                let error = q.TryGetString "error"
+                Views.register error)
+            Response.ofHtmlCsrf
+
+    CookieSession.authenticate (Response.redirectTemporarily "/user/account") proceed
 
 let handleLoginView: HttpHandler =
-    CookieSession.authenticate (fun result ->
-        if result.Succeeded then
-            Response.redirectTemporarily "/user/account"
-        else
-            Request.mapQuery
-                (fun q ->
-                    let error = q.TryGetString "error"
-                    Views.login error)
-                Response.ofHtmlCsrf)
+    let proceed =
+        Request.mapQuery
+            (fun q ->
+                let error = q.TryGetString "error"
+                Views.login error)
+            Response.ofHtmlCsrf
+
+    CookieSession.authenticate (Response.redirectTemporarily "/user/account") proceed
 
 let handleAccountView: HttpHandler =
-    CookieSession.authenticate (fun result ctx ->
-        if result.Succeeded then
-            let account = CookieSession.account ctx
+    let success ctx =
+        let account = CookieSession.account ctx
 
-            match account with
-            | None -> CookieSession.challengeTo "/user/account" ctx
-            | Some value -> Response.ofHtml (Views.userAccount value) ctx
-        else
-            CookieSession.challengeTo "/user/account" ctx)
+        match account with
+        | None -> CookieSession.challengeTo "/user/account" ctx
+        | Some value -> Response.ofHtml (Views.userAccount value) ctx
 
-let handleUserRegistration save hash: HttpHandler =
+    CookieSession.authenticate success (CookieSession.challengeTo "/user/account")
+
+let handleUserRegistration save hasher : HttpHandler =
     fun ctx ->
         task {
             let! form = Request.getFormSecure ctx
@@ -63,7 +61,7 @@ let handleUserRegistration save hash: HttpHandler =
                     if confirmed <> 0 then
                         None
                     else
-                        let hashedPass = hash password
+                        let hashedPass = hasher password
 
                         Some
                             { id = Guid()
@@ -103,7 +101,7 @@ let handleUserRegistration save hash: HttpHandler =
             | None -> return! Response.redirectTemporarily "/user/register?error=unknown" ctx
         }
 
-let handleUserLogin find verify: HttpHandler =
+let handleUserLogin find verify : HttpHandler =
     fun ctx ->
         task {
             let! form = Request.getFormSecure ctx
@@ -147,12 +145,13 @@ let handleUserLogin find verify: HttpHandler =
         }
 
 let handleUserLogout: HttpHandler =
-    CookieSession.authenticate (fun result ctx ->
-        task {
-            if result.Succeeded then
-                do! CookieSession.signOut ctx
-            else
-                ()
+    let redirect = Response.redirectTemporarily "/user/login"
 
-            return! Response.redirectTemporarily "/user/login" ctx
-        })
+    let success ctx =
+        task {
+            do! CookieSession.signOut ctx
+            return! redirect ctx
+        }
+        :> Task // Not sure why it doesn't compile without this
+
+    CookieSession.authenticate success redirect

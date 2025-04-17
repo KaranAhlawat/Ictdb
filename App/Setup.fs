@@ -29,6 +29,7 @@ let configureApp (builder: WebApplicationBuilder) =
     let app = builder.Build()
 
     app.UseHttpsRedirection() |> ignore
+    app.UseStaticFiles() |> ignore
     app.UseAntiforgery() |> ignore
     app.UseAuthentication() |> ignore
     app.UseRouting() |> ignore

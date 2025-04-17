@@ -2,6 +2,7 @@ module App.Authentication
 
 open System.Security.Claims
 open System.Text.Json
+open System.Threading.Tasks
 open App.Generated.Db.``public``
 open App.Utils
 open Falco
@@ -14,7 +15,11 @@ open System.Linq
 module CookieSession =
     let private scheme = CookieAuthenticationDefaults.AuthenticationScheme
 
-    let authenticate f = Request.authenticate scheme f
+    let authenticateResult onSuccess onFailure =
+        Request.authenticate scheme (fun result -> if result.Succeeded then onSuccess result else onFailure)
+
+    let authenticate onSuccess onFailure =
+        Request.authenticate scheme (fun result -> if result.Succeeded then onSuccess else onFailure)
 
     let challengeTo uri =
         Response.challengeAndRedirect scheme uri
