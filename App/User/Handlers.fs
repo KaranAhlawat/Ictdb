@@ -4,11 +4,8 @@ open System
 open System.Security.Claims
 open System.Text.Json
 open App.Authentication
-open App.DataSource
-open App.User.Persistence
 open App.User.Services
 open App.Utils
-open BCrypt.Net
 open Falco
 
 open App.Generated.Db.``public``
@@ -19,11 +16,11 @@ let handleRegisterView: HttpHandler =
         if result.Succeeded then
             Response.redirectTemporarily "/user/account"
         else
-            (Request.mapQuery
+            Request.mapQuery
                 (fun q ->
                     let error = q.TryGetString "error"
                     Views.register error)
-                Response.ofHtmlCsrf))
+                Response.ofHtmlCsrf)
 
 let handleLoginView: HttpHandler =
     CookieSession.authenticate (fun result ->
@@ -47,11 +44,9 @@ let handleAccountView: HttpHandler =
         else
             CookieSession.challengeTo "/user/account" ctx)
 
-let handleUserRegistration: HttpHandler =
+let handleUserRegistration save hash: HttpHandler =
     fun ctx ->
         task {
-            let ctxFactory = ctx.Plug<CtxFactory>()
-
             let! form = Request.getFormSecure ctx
 
             let user =
@@ -68,11 +63,11 @@ let handleUserRegistration: HttpHandler =
                     if confirmed <> 0 then
                         None
                     else
-                        let hashedPass = BCrypt.EnhancedHashPassword password
+                        let hashedPass = hash password
 
                         Some
                             { id = Guid()
-                              provider_id = DateTime.UtcNow.ToString("o")
+                              provider_id = DateTime.UtcNow.ToString "o"
                               username = username
                               user_email = email
                               user_password = Some hashedPass
@@ -84,7 +79,7 @@ let handleUserRegistration: HttpHandler =
                 user
                 |> TaskOption.traverse (fun u ->
                     task {
-                        let! _ = UserRepo.Live.Add ctxFactory u
+                        let! _ = save u
                         return u
                     })
 
@@ -108,11 +103,9 @@ let handleUserRegistration: HttpHandler =
             | None -> return! Response.redirectTemporarily "/user/register?error=unknown" ctx
         }
 
-let handleUserLogin: HttpHandler =
+let handleUserLogin find verify: HttpHandler =
     fun ctx ->
         task {
-            let ctxf = ctx.Plug<CtxFactory>()
-
             let! form = Request.getFormSecure ctx
             let q = Request.getQuery ctx
             let returnUri = q.TryGetString "returnUrl"
@@ -130,8 +123,8 @@ let handleUserLogin: HttpHandler =
             match credentials with
             | None -> return! Response.redirectTemporarily "/user/login" ctx
             | Some credentials ->
-                let! user = UserRepo.Live.OfUsername ctxf credentials.Username
-                let valid = UserService.ValidateCredentials BCrypt.EnhancedVerify user credentials
+                let! user = find credentials.Username
+                let valid = verify user credentials
 
                 match valid with
                 | InvalidCreds -> return! Response.redirectTemporarily "/user/login?error=invalid_creds" ctx
@@ -154,7 +147,7 @@ let handleUserLogin: HttpHandler =
         }
 
 let handleUserLogout: HttpHandler =
-    Request.authenticate CookieAuthenticationDefaults.AuthenticationScheme (fun result ctx ->
+    CookieSession.authenticate (fun result ctx ->
         task {
             if result.Succeeded then
                 do! CookieSession.signOut ctx
