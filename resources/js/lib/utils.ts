@@ -1,23 +1,30 @@
-import type { RequestPayload } from "@inertiajs/core";
-import { router } from "@inertiajs/react";
-import { clsx, type ClassValue } from "clsx";
-import { Path, UseFormReturn } from "react-hook-form";
-import { twMerge } from "tailwind-merge";
+import { router } from '@inertiajs/react';
+import { clsx, type ClassValue } from 'clsx';
+import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
+import { twMerge } from 'tailwind-merge';
+import * as z from 'zod/v4-mini';
 
 export function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs))
+    return twMerge(clsx(inputs));
 }
 
-export function inertiaFormHandler<T extends RequestPayload, U extends UseFormReturn<T>>(values: T, routeName: string, form: U) {
-    router.post(route(routeName), values, {
-        onError: (e) => {
-            for (const key in e) {
-                const message = e[key];
+export function postInertiaForm<T extends FieldValues, U extends UseFormReturn<T>, E extends string & Path<T>>(routeName: string, form: U) {
+    return (values: T) => {
+        const errSchema = z.enum(Object.keys(values) as [E, ...E[]]);
 
-                form.setError(key as Path<T>, {
-                    message,
-                });
-            }
-        },
-    });
+        router.post(route(routeName), values, {
+            onError: (e) => {
+                for (const key in e) {
+                    const valid = errSchema.safeParse(key);
+
+                    if (valid.success) {
+                        form.setError(valid.data, {
+                            message: e[valid.data],
+                            type: 'value',
+                        });
+                    }
+                }
+            },
+        });
+    };
 }

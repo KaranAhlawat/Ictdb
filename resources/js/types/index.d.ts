@@ -7,6 +7,10 @@ export interface Auth {
 export interface SharedData {
     auth: Auth;
     ziggy: Config & { location: string };
+    flash: {
+        message: string | undefined;
+        type: string | undefined;
+    };
     [key: string]: unknown;
 }
 
