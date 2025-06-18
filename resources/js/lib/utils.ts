@@ -9,22 +9,25 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function postInertiaForm<T extends FieldValues, U extends UseFormReturn<T>, E extends string & Path<T>>(routeName: string, form: U) {
-    return (values: T) => {
+    return async (values: T) => {
         const errSchema = z.enum(Object.keys(values) as [E, ...E[]]);
 
-        router.post(route(routeName), values, {
-            onError: (e) => {
-                for (const key in e) {
-                    const valid = errSchema.safeParse(key);
-
-                    if (valid.success) {
-                        form.setError(valid.data, {
-                            message: e[valid.data],
-                            type: 'value',
-                        });
+        await new Promise<void>((resolve, reject) => {
+            router.post(route(routeName), values, {
+                onFinish: () => resolve(),
+                onError: (e) => {
+                    for (const key in e) {
+                        const valid = errSchema.safeParse(key);
+                        if (valid.success) {
+                            form.setError(valid.data, {
+                                message: e[valid.data],
+                                type: 'value',
+                            });
+                        }
                     }
-                }
-            },
+                    reject();
+                },
+            });
         });
     };
 }

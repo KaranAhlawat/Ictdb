@@ -117,4 +117,9 @@ class AccountController extends Controller
 
         return to_route('account.show.login');
     }
+
+    public function show_dashboard()
+    {
+        return Inertia::render('account/dashboard');
+    }
 }

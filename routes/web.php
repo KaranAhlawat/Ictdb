@@ -1,7 +1,14 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\TalkController;
 use Illuminate\Support\Facades\Route;
+
+
+Route::middleware('auth')->controller(AccountController::class)->name('account.')->prefix('/account')->group(function () {
+    Route::get('/dashboard', 'show_dashboard')->name('show.dashboard');
+    Route::post('/logout', 'logout')->name('logout');
+});
 
 Route::middleware('guest')->controller(AccountController::class)->name('account.')->prefix('/account')->group(function () {
     Route::get('/register', 'show_register')->name('show.register');
@@ -15,5 +22,9 @@ Route::middleware('guest')->controller(AccountController::class)->name('account.
     Route::get('/github', 'github')->name('github');
 });
 
-Route::get('/callback/google', [AccountController::class, 'google_callback'])->middleware('guest')->name('google.callback');
-Route::get('/callback/github', [AccountController::class, 'github_callback'])->middleware('guest')->name('github.callback');
+Route::middleware('guest')->controller(AccountController::class)->prefix('/callback')->group(function () {
+    Route::get('/google', 'google_callback')->name('google.callback');
+    Route::get('/github', 'github_callback')->name('github.callback');
+});
+
+Route::get('/', [TalkController::class, 'index'])->name('talk.index');

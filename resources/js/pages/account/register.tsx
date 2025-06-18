@@ -9,6 +9,7 @@ import { registerSchema, RegisterSchema } from '@/lib/schema/register';
 import { postInertiaForm } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from '@inertiajs/react';
+import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 export default function Register() {
@@ -21,6 +22,8 @@ export default function Register() {
             password_confirmation: '',
         },
     });
+
+    const { formState } = form;
 
     return (
         <div className="mx-auto w-full max-w-md">
@@ -83,21 +86,21 @@ export default function Register() {
                             />
                         </CardContent>
                         <CardFooter className="flex flex-col gap-2">
-                            <Button type="submit" className="w-full">
-                                Register
+                            <Button type="submit" className="w-full" disabled={formState.isSubmitting}>
+                                {formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Register'}
                             </Button>
-                            <p className="text-sm text-muted-foreground">or</p>
                             <p className="text-sm text-muted-foreground">
                                 Already have an account?{' '}
-                                <Button variant="link" className="text-primary" size={'sm'}>
+                                <Button variant="link" className="text-primary" size={'sm'} disabled={formState.isSubmitting}>
                                     <Link href={route('account.show.login')}>Login</Link>
                                 </Button>
                             </p>
+                            <p className="mb-2 text-sm text-muted-foreground">or</p>
                             <Link className="w-full" href={route('account.google')}>
-                                <GoogleButton className="w-full" />
+                                <GoogleButton className="w-full" disabled={formState.isSubmitting} />
                             </Link>
                             <Link className="w-full" href={route('account.github')}>
-                                <GithubButton className="w-full" />
+                                <GithubButton className="w-full" disabled={formState.isSubmitting} />
                             </Link>
                         </CardFooter>
                     </Card>

@@ -7,8 +7,8 @@ export default function Navbar({ children }: { children?: React.ReactNode }) {
                 <span className="mr-2 bg-primary px-2 py-1 text-primary-foreground">ict</span>
                 db
             </h1>
-            <ModeToggle />
             {children}
+            <ModeToggle />
         </nav>
     );
 }

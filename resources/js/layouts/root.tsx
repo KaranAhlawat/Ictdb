@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     break;
             }
         }
-    }, [flash?.type, flash?.message]);
+    }, [flash]);
 
     return (
         <>
