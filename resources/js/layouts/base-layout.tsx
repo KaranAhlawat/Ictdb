@@ -1,21 +1,26 @@
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import RootLayout from '@/layouts/root';
+import { cn } from '@/lib/utils';
 import { SharedData } from '@/types';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { LogOut } from 'lucide-react';
+import { FormEvent, ReactNode } from 'react';
 
-export default function BaseLayout({ children }: { children: React.ReactNode }) {
+export default function BaseLayout({ children }: { children: ReactNode }) {
     const {
         auth: { user },
+        ziggy: { location }
     } = usePage<SharedData>().props;
 
     const form = useForm();
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         form.post(route('account.logout'));
     };
+
+    const isAuthFormPage = location.endsWith('login') || location.endsWith('register');
 
     return (
         <RootLayout>
@@ -43,7 +48,9 @@ export default function BaseLayout({ children }: { children: React.ReactNode }) 
                         </>
                     )}
                 </Navbar>
-                <main className="grid flex-1 place-items-center px-5">{children}</main>
+                <main className={cn('grid flex-1 p-5', isAuthFormPage && "place-items-center")}>
+                    {children}
+                </main>
             </div>
         </RootLayout>
     );

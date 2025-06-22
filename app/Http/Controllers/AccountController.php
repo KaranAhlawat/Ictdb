@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -12,28 +10,33 @@ class AccountController extends Controller
 {
     public function show_register()
     {
-        return Inertia::render('account/register');
+        return inertia('account/register');
     }
 
-    public function register(Request $request)
+    public function register()
     {
-        $request->validate([
+        request()->validate([
             'name' => ['required'],
             'email' => ['required', 'email'],
             'password' => ['required'],
-            'password_confirmation' => ['required', 'same:password']
+            'password_confirmation' => ['required', 'same:password'],
         ]);
 
-        if (User::where('email', $request->email)->where('provider', 'basic')->exists()) {
+        $user_exists = User::where([
+            ['email', request('email')],
+            ['provider', 'basic'],
+        ])->exists();
+
+        if ($user_exists) {
             return back()->withErrors(['email' => 'Email already registered']);
         }
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password,
+            'name' => request('name'),
+            'email' => request('email'),
+            'password' => request('password'),
             'provider' => 'basic',
-            'provider_id' => strval(time())
+            'provider_id' => strval(time()),
         ]);
 
         return to_route('account.show.login')->with(['message' => 'Registered successfully', 'type' => 'success']);
@@ -44,25 +47,25 @@ class AccountController extends Controller
         return Inertia::render('account/login');
     }
 
-    public function login(Request $request)
+    public function login()
     {
-        $credentials =  $request->validate([
+        $credentials = request()->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        if (Auth::attempt(array_merge($credentials, ['provider' => 'basic']))) {
-            $request->session()->regenerate();
+        if (auth()->attempt(array_merge($credentials, ['provider' => 'basic']))) {
+            request()->session()->regenerate();
 
             return to_route('account.show.dashboard');
         }
 
-        return back()->with(['message' => 'Invalid credentials', 'type' => 'error'])->withInput($request->except('password'));
+        return back()->with(['message' => 'Invalid credentials', 'type' => 'error'])->withInput(request()->except('password'));
     }
 
     public function google()
     {
-        return Inertia::location(Socialite::driver('google')->redirect()->getTargetUrl());
+        return inertia_location(Socialite::driver('google')->redirect()->getTargetUrl());
     }
 
     public function google_callback()
@@ -71,22 +74,22 @@ class AccountController extends Controller
 
         $user = User::updateOrCreate([
             'provider_id' => $google_user->getId(),
-            'provider' => 'google'
+            'provider' => 'google',
         ], [
             'name' => $google_user->getName(),
             'email' => $google_user->getEmail(),
             'provider_id' => $google_user->getId(),
-            'provider' => 'google'
+            'provider' => 'google',
         ]);
 
-        Auth::login($user);
+        auth()->login($user);
 
         return to_route('account.show.dashboard');
     }
 
     public function github()
     {
-        return Inertia::location(Socialite::driver('github')->redirect()->getTargetUrl());
+        return inertia_location(Socialite::driver('github')->redirect()->getTargetUrl());
     }
 
     public function github_callback()
@@ -95,23 +98,22 @@ class AccountController extends Controller
 
         $user = User::updateOrCreate([
             'provider_id' => $github_user->getId(),
-            'provider' => 'github'
+            'provider' => 'github',
         ], [
             'name' => $github_user->getName(),
             'email' => $github_user->getEmail(),
             'provider_id' => $github_user->getId(),
-            'provider' => 'github'
+            'provider' => 'github',
         ]);
 
-        Auth::login($user);
+        auth()->login($user);
 
         return to_route('account.show.dashboard');
     }
 
     public function logout()
     {
-        Auth::logout();
-
+        auth()->logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
 
@@ -120,6 +122,6 @@ class AccountController extends Controller
 
     public function show_dashboard()
     {
-        return Inertia::render('account/dashboard');
+        return inertia('account/dashboard');
     }
 }

@@ -4,13 +4,18 @@ export interface Auth {
     user: User | undefined;
 }
 
+interface Ziggy extends Config {
+    location: string;
+}
+
 export interface SharedData {
     auth: Auth;
-    ziggy: Config & { location: string };
+    ziggy: Ziggy;
     flash: {
         message: string | undefined;
         type: string | undefined;
     };
+    url: string;
     [key: string]: unknown;
 }
 

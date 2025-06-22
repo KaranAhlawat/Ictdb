@@ -19,6 +19,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->timestamps();
 
+            $table->foreignId('user_id')->constrained();
+
             $table->index('title');
             $table->index('speaker');
         });

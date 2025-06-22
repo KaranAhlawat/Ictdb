@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
@@ -46,7 +45,7 @@ class HandleInertiaRequests extends Middleware
                 'message' => $request->session()->get('message'),
                 'type' => $request->session()->get('type'),
             ],
-            'ziggy' => fn(): array => [
+            'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],

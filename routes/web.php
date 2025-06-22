@@ -4,7 +4,6 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\TalkController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::middleware('auth')->controller(AccountController::class)->name('account.')->prefix('/account')->group(function () {
     Route::get('/dashboard', 'show_dashboard')->name('show.dashboard');
     Route::post('/logout', 'logout')->name('logout');
@@ -27,4 +26,11 @@ Route::middleware('guest')->controller(AccountController::class)->prefix('/callb
     Route::get('/github', 'github_callback')->name('github.callback');
 });
 
-Route::get('/', [TalkController::class, 'index'])->name('talk.index');
+Route::controller(TalkController::class)->name('talk.')->group(function () {
+    Route::get('/', 'index')->name('index');
+
+    Route::get('/talk/create', 'create')->name('create')->middleware('auth');
+    Route::post('/talk/create', 'store')->name('store')->middleware('auth');
+
+    Route::get('/talk/{talk}', 'show')->name('show');
+});
