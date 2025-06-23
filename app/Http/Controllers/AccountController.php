@@ -57,7 +57,7 @@ class AccountController extends Controller
         if (auth()->attempt(array_merge($credentials, ['provider' => 'basic']))) {
             request()->session()->regenerate();
 
-            return to_route('account.show.dashboard');
+            return redirect()->intended(route('account.show.dashboard'));
         }
 
         return back()->with(['message' => 'Invalid credentials', 'type' => 'error'])->withInput(request()->except('password'));
@@ -84,7 +84,7 @@ class AccountController extends Controller
 
         auth()->login($user);
 
-        return to_route('account.show.dashboard');
+        return redirect()->intended(route('account.show.dashboard'));
     }
 
     public function github()
@@ -108,7 +108,7 @@ class AccountController extends Controller
 
         auth()->login($user);
 
-        return to_route('account.show.dashboard');
+        return redirect()->intended(route('account.show.dashboard'));
     }
 
     public function logout()
