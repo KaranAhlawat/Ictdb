@@ -28,7 +28,7 @@ export default function Register() {
     return (
         <div className="mx-auto w-full max-w-md">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(postInertiaForm('account.register', form))}>
+                <form onSubmit={form.handleSubmit(postInertiaForm(route('account.register'), form))}>
                     <Card>
                         <CardTitle className="text-center text-sm">Create Your Account</CardTitle>
                         <CardContent className="flex flex-col gap-4">

@@ -6,22 +6,33 @@ import { Textarea } from '@/components/ui/textarea';
 import BaseLayout from '@/layouts/base-layout';
 import { talkSchema, TalkSchema } from '@/lib/schema/talk';
 import { postInertiaForm } from '@/lib/utils';
+import { Talk } from '@/types/domain';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft, Loader2, Plus, X } from 'lucide-react';
 import { ReactElement, useRef } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
-export default function Create() {
+interface EditProps {
+    talk: Talk;
+}
+
+export default function Edit({ talk }: EditProps) {
     const tagRef = useRef<HTMLInputElement>(null);
     const form = useForm<TalkSchema>({
         resolver: zodResolver(talkSchema),
         defaultValues: {
-            link: '',
-            title: '',
-            tags: [],
+            link: talk.link,
+            description: talk.description,
+            title: talk.title,
+            tags: talk.tags.map((value) => ({ value })),
+            speaker: talk.speaker,
         },
     });
-    const { fields: tags, append, remove } = useFieldArray({
+    const {
+        fields: tags,
+        append,
+        remove,
+    } = useFieldArray({
         name: 'tags',
         control: form.control,
     });
@@ -39,7 +50,10 @@ export default function Create() {
     return (
         <div className={'mr-auto ml-10 w-full max-w-lg pt-10'}>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(postInertiaForm(route('talk.create'), form))} className={'flex flex-col gap-8'}>
+                <form
+                    onSubmit={form.handleSubmit(postInertiaForm(route('talk.update', { talk: talk.slug }), form))}
+                    className={'flex flex-col gap-8'}
+                >
                     <FormField
                         control={form.control}
                         name={'title'}
@@ -142,7 +156,7 @@ export default function Create() {
                             Back
                         </Button>
                         <Button type="submit" className={'w-fit'} disabled={formState.isSubmitting}>
-                            {formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Add'}
+                            {formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Update'}
                         </Button>
                     </div>
                 </form>
@@ -151,4 +165,4 @@ export default function Create() {
     );
 }
 
-Create.layout = (p: ReactElement) => <BaseLayout children={p} />;
+Edit.layout = (p: ReactElement) => <BaseLayout>{p}</BaseLayout>;

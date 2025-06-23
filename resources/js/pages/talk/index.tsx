@@ -18,8 +18,8 @@ export default function Index({ talks }: TalkListProps) {
 
     let list = (
         <div className="py-4">
-            <h1 className={'text-lg text-muted-foreground text-center'}>
-                <span className={'text-primary font-medium'}>Whoops!</span> Didn't find anything
+            <h1 className={'text-center text-lg text-muted-foreground'}>
+                <span className={'font-medium text-primary'}>Whoops!</span> Didn't find anything
             </h1>
         </div>
     );
@@ -53,10 +53,12 @@ export default function Index({ talks }: TalkListProps) {
                         onChange={(e) => form.setData('q', e.target.value)}
                     />
                 </form>
-                <Button className={'flex flex-row gap-2 items-center'}>
-                    <Plus />
-                    <Link href={route('talk.create')}>Add a talk</Link>
-                </Button>
+                <Link href={route('talk.create')}>
+                    <Button className={'flex flex-row items-center gap-2'}>
+                        <Plus />
+                        Add a talk
+                    </Button>
+                </Link>
             </div>
             {list}
         </div>
@@ -65,13 +67,17 @@ export default function Index({ talks }: TalkListProps) {
 
 function TalkCard({ talk }: { talk: Talk }) {
     return (
-        <Card className="flex min-w-sm flex-col pt-0 gap-0">
+        <Card className="flex min-w-sm flex-col gap-0 pt-0">
             <CardHeader className={'p-0'}>
-                <img className={'w-full rounded-t-lg'} src={`${talk.thumbnail}/hqdefault.jpg`} alt={'Talk image'} />
+                <Link href={route('talk.show', { talk: talk.slug })}>
+                    <img className={'w-full rounded-t-lg'} src={`${talk.thumbnail}/hqdefault.jpg`} alt={'Talk image'} />
+                </Link>
             </CardHeader>
             <CardContent>
                 <Button variant={'link'} className={'px-0'}>
-                    <Link href={route('talk.show', { talk: talk.slug })} className={'font-semibold'}>{talk.title}</Link>
+                    <Link href={route('talk.show', { talk: talk.slug })} className={'font-semibold'}>
+                        {talk.title}
+                    </Link>
                 </Button>
             </CardContent>
             <CardFooter className={'flex justify-between'}>

@@ -8,12 +8,12 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export function postInertiaForm<T extends FieldValues, U extends UseFormReturn<T>, E extends string & Path<T>>(routeName: string, form: U) {
+export function postInertiaForm<T extends FieldValues, U extends UseFormReturn<T>, E extends string & Path<T>>(to: string, form: U) {
     return async (values: T) => {
         const errSchema = z.enum(Object.keys(values) as [E, ...E[]]);
 
         await new Promise<void>((resolve, reject) => {
-            router.post(route(routeName), values, {
+            router.post(to, values, {
                 onFinish: () => resolve(),
                 onError: (e) => {
                     for (const key in e) {
