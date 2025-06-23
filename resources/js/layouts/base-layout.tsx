@@ -31,7 +31,7 @@ export default function BaseLayout({ children }: { children: ReactNode }) {
                         <div className={'mx-auto flex max-w-lg items-center justify-center gap-4'}>
                             <Input
                                 type={'text'}
-                                placeholder={'Search by title, speaker, or tag'}
+                                placeholder={'Search by title, speaker or tags'}
                                 name={'q'}
                                 className={'flex-1'}
                                 defaultValue={new URLSearchParams(window.location.search).get('q') ?? ''}

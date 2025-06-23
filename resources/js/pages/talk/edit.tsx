@@ -24,7 +24,7 @@ export default function Edit({ talk }: EditProps) {
             link: talk.link,
             description: talk.description,
             title: talk.title,
-            tags: talk.tags.map((value) => ({ value })),
+            tags: talk.tags?.map((value) => ({ value: value.name })) ?? [],
             speaker: talk.speaker,
         },
     });

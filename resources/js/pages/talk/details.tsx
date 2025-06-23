@@ -17,7 +17,7 @@ export default function Details({ talk }: DetailsProps) {
     } = usePage<SharedData>().props;
 
     return (
-        <div className={'grid grid-cols-1 place-items-center'}>
+        <div className={'grid grid-cols-1 place-items-center pt-4'}>
             <div className={'mx-auto flex max-w-4xl min-w-2xl flex-col gap-6'}>
                 <div className={'flex justify-between'}>
                     <Button variant={'ghost'} className={'w-fit'} onClick={() => window.history.back()}>
@@ -35,8 +35,8 @@ export default function Details({ talk }: DetailsProps) {
                     <h1 className={'text-3xl font-bold'}>{talk.title}</h1>
                     <div className={'flex gap-2'}>
                         {talk.tags.map((tag) => (
-                            <Link key={tag} href={route('talk.index', { _query: { q: tag } })}>
-                                <Badge className={'min-w-16'}>{tag}</Badge>
+                            <Link key={tag.id} href={route('talk.index', { _query: { q: tag } })}>
+                                <Badge className={'min-w-16'}>{tag.name}</Badge>
                             </Link>
                         ))}
                     </div>
@@ -50,7 +50,7 @@ export default function Details({ talk }: DetailsProps) {
                         </a>
                     </Button>
                 </div>
-                {talk.description ? <p className={'text-justify font-serif'}>{talk.description}</p> : null}
+                {talk.description ? <p className={'text-justify'}>{talk.description}</p> : null}
                 <p className={'pt-10 text-sm text-muted-foreground'}>
                     Added by <span className={'text-primary'}>{talk.user.name}</span> on{' '}
                     <span className={'text-primary'}>
