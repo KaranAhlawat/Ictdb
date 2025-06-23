@@ -117,7 +117,7 @@ export default function Edit({ talk }: EditProps) {
                             <FormItem>
                                 <FormLabel>Tags</FormLabel>
                                 <FormControl>
-                                    <div>
+                                    <div className={'flex flex-col gap-2'}>
                                         <div className={'flex flex-row gap-2'}>
                                             {tags.map((tag, index) => (
                                                 <div key={tag.id} className={'flex justify-between gap-2'}>
@@ -140,6 +140,7 @@ export default function Edit({ talk }: EditProps) {
                                                         addTag();
                                                     }
                                                 }}
+                                                defaultValue={''}
                                             />
                                             <Button variant={'ghost'} size={'icon'} type={'button'} onClick={addTag}>
                                                 <Plus />

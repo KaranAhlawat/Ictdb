@@ -35,8 +35,8 @@ export default function Details({ talk }: DetailsProps) {
                     <h1 className={'text-3xl font-bold'}>{talk.title}</h1>
                     <div className={'flex gap-2'}>
                         {talk.tags.map((tag) => (
-                            <Link href={route('talk.index', { _query: { q: tag } })}>
-                                <Badge className={'min-w-16'} key={tag}>
+                            <Link key={tag} href={route('talk.index', { _query: { q: tag } })}>
+                                <Badge className={'min-w-16'}>
                                     {tag}
                                 </Badge>
                             </Link>
