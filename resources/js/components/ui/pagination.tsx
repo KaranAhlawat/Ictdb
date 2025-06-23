@@ -8,7 +8,6 @@ import { Link } from "@inertiajs/react";
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { VariantProps } from 'class-variance-authority';
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (

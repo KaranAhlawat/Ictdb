@@ -21,7 +21,11 @@ export default function Create() {
             tags: [],
         },
     });
-    const { fields: tags, append, remove } = useFieldArray({
+    const {
+        fields: tags,
+        append,
+        remove,
+    } = useFieldArray({
         name: 'tags',
         control: form.control,
     });

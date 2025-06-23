@@ -9,4 +9,3 @@ export interface Talk extends Omit<TalkSchema, 'tags'> {
     slug: string;
     tags: string[];
 }
-

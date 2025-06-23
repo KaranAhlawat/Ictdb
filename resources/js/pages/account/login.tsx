@@ -1,5 +1,6 @@
 import GithubButton from '@/components/github-button';
 import GoogleButton from '@/components/google-button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from '@inertiajs/react';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
 
 export default function Login() {
     const form = useForm<LoginSchema>({

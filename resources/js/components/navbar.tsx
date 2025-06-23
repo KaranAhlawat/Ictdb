@@ -11,9 +11,7 @@ export default function Navbar({ children, middle }: { children?: ReactNode; mid
                     db
                 </h1>
             </Link>
-            <div className={'flex-1'}>
-                {middle}
-            </div>
+            <div className={'flex-1'}>{middle}</div>
             {children}
             <ModeToggle />
         </nav>
