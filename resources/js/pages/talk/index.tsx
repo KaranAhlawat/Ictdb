@@ -1,21 +1,21 @@
+import { AppPagination } from '@/components/app-pagination';
+import { TalkCard } from '@/components/talk-card';
 import { Button } from '@/components/ui/button';
-import { Card, CardAction, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import BaseLayout from '@/layouts/base-layout';
+import { debounce } from '@/lib/utils';
+import { PaginationData } from '@/types';
 import { Talk } from '@/types/domain';
-import { Link, useForm } from '@inertiajs/react';
-import { Plus, SquareArrowOutUpRight } from 'lucide-react';
-import { FormEvent, ReactElement } from 'react';
+import { Link, router } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
+import { ChangeEvent, ReactElement } from 'react';
 
 interface TalkListProps {
-    talks: Talk[];
+    pagination: PaginationData<Talk>;
+    fields: { q?: string };
 }
 
-export default function Index({ talks }: TalkListProps) {
-    const form = useForm({
-        q: new URLSearchParams(window.location.search).get('q') ?? '',
-    });
-
+export default function Index({ pagination: { data: talks, links, next_page_url, prev_page_url }, fields }: TalkListProps) {
     let list = (
         <div className="py-4">
             <h1 className={'text-center text-lg text-muted-foreground'}>
@@ -36,23 +36,20 @@ export default function Index({ talks }: TalkListProps) {
         );
     }
 
-    const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        form.get('/');
-    };
-
     return (
         <div className={'mx-auto max-w-7xl min-w-4xl pt-4'}>
+            {/* Search and new input */}
             <div className={'flex items-center gap-4'}>
-                <form className={'flex-1'} onSubmit={onSubmit}>
-                    <Input
-                        type={'text'}
-                        placeholder={'Search by title, author, or description'}
-                        name={'q'}
-                        value={form.data.q}
-                        onChange={(e) => form.setData('q', e.target.value)}
-                    />
-                </form>
+                <Input
+                    type={'text'}
+                    placeholder={'Search by title, author, or tag'}
+                    name={'q'}
+                    className={'flex-1'}
+                    defaultValue={fields.q ?? ''}
+                    onChange={debounce((e: ChangeEvent<HTMLInputElement>) => {
+                        router.get('/', { q: e.target.value }, { preserveState: true, replace: true });
+                    }, 250)}
+                />
                 <Link href={route('talk.create')}>
                     <Button className={'flex flex-row items-center gap-2'}>
                         <Plus />
@@ -60,37 +57,13 @@ export default function Index({ talks }: TalkListProps) {
                     </Button>
                 </Link>
             </div>
-            {list}
-        </div>
-    );
-}
 
-function TalkCard({ talk }: { talk: Talk }) {
-    return (
-        <Card className="flex min-w-sm flex-col gap-0 pt-0">
-            <CardHeader className={'p-0'}>
-                <Link href={route('talk.show', { talk: talk.slug })}>
-                    <img className={'w-full rounded-t-lg'} src={`${talk.thumbnail}/hqdefault.jpg`} alt={'Talk image'} />
-                </Link>
-            </CardHeader>
-            <CardContent>
-                <Button variant={'link'} className={'px-0'}>
-                    <Link href={route('talk.show', { talk: talk.slug })} className={'font-semibold'}>
-                        {talk.title}
-                    </Link>
-                </Button>
-            </CardContent>
-            <CardFooter className={'flex justify-between'}>
-                <p className="text-sm text-muted-foreground">by {talk.speaker ?? 'unknown'}</p>
-                <CardAction>
-                    <Button variant="link" size="sm">
-                        <a href={talk.link} target="_blank" rel="noopener noreferrer">
-                            <SquareArrowOutUpRight />
-                        </a>
-                    </Button>
-                </CardAction>
-            </CardFooter>
-        </Card>
+            {/* Talks grid */}
+            {list}
+
+            {/* Pagination links */}
+            <AppPagination links={links} next_page_url={next_page_url} prev_page_url={prev_page_url} />
+        </div>
     );
 }
 

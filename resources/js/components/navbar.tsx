@@ -1,4 +1,4 @@
-import ModeToggle from '@/components/ModeToggle';
+import ModeToggle from '@/components/mode-toggle';
 import { Link } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 

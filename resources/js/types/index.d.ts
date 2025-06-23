@@ -16,6 +16,7 @@ export interface SharedData {
         type: string | undefined;
     };
     url: string;
+
     [key: string]: unknown;
 }
 
@@ -25,5 +26,22 @@ export interface User {
     email: string;
     created_at: string;
     updated_at: string;
+
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface Link {
+    active: boolean;
+    label: string;
+    url: string | null;
+}
+
+export interface PaginationInfo {
+    links: Link[];
+    next_page_url: string | null;
+    prev_page_url: string | null;
+}
+
+export interface PaginationData<T> extends PaginationInfo {
+    data: T[];
 }

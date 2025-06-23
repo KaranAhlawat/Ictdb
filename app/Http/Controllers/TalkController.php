@@ -2,38 +2,70 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers;
 use App\Models\Talk;
-use Illuminate\Support\Str;
 
 class TalkController extends Controller
 {
     public function index()
     {
-        $filter = request()->query('q');
-        $query = Talk::orderBy('created_at');
-        if (! empty($filter)) {
-            $query
-                ->whereLike('title', "%{$filter}%")
-                ->orWhereLike('description', "%{$filter}%")
-                ->orWhereLike('speaker', "%{$filter}%")
-                ->orWhereRaw('? = ANY (tags)', [$filter]);
-        }
-
         return inertia('talk/index', [
-            'talks' => $query->get()->all(),
+            'pagination' => Talk::query()
+                ->orderBy('created_at')
+                ->when(request('q'), function ($query, $filter) {
+                    $query
+                        ->whereLike('title', "%{$filter}%")
+                        ->orWhereLike('speaker', "%{$filter}%")
+                        ->orWhereRaw('? = ANY (tags)', [$filter]);
+                })
+                ->paginate(9)
+                ->withQueryString(),
+            'fields' => request()->only(['q']),
         ]);
     }
 
     public function show(Talk $talk)
     {
-        $talk->load(['user']);
-
         return inertia('talk/details', [
-            'talk' => $talk,
+            'talk' => $talk->load(['user']),
         ]);
     }
 
-    public function show_edit(Talk $talk)
+    public function create()
+    {
+        return inertia('talk/create');
+    }
+
+    public function store()
+    {
+        $data = request()->validate([
+            'title' => ['required', 'string', 'min:3', 'max:255'],
+            'link' => ['required', 'url'],
+            'speaker' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'tags' => ['array'],
+        ]);
+
+        $slug = str($data['title'])->slug();
+
+        if (Talk::where('slug', $slug)->exists()) {
+            return back()
+                ->with(Helpers::error_flash('Failed to create talk'))
+                ->withErrors(['title' => 'Talk with that title already exists'])
+                ->withInput(request()->all());
+        }
+
+        $talk = new Talk($data);
+        $talk->tags = collect($data['tags'])->pluck('value')->unique()->toArray();
+        $talk->thumbnail = Helpers::create_thumbnail_url($talk->link);
+        $talk->slug = $slug;
+        $talk->user_id = auth()->id();
+        $talk->save();
+
+        return to_route('talk.show', ['talk' => $slug])->with(Helpers::success_flash('Talk created'));
+    }
+
+    public function edit(Talk $talk)
     {
         if (auth()->user()->id !== $talk->user_id) {
             abort(403);
@@ -51,92 +83,33 @@ class TalkController extends Controller
             abort(403);
         }
 
-        request()->validate([
+        $data = request()->validate([
             'title' => ['required', 'min:3', 'max:255'],
             'link' => ['required', 'url'],
+            'speaker' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'tags' => ['array'],
         ]);
 
-        $new_slug = str(request('title'))->slug();
+        $new_slug = str($data['title'])->slug();
 
         if ((string) $talk->slug !== (string) $new_slug && Talk::where('slug', $new_slug)->exists()) {
             return back()
-                ->with(['message' => 'Failed to create talk', 'type' => 'error'])
+                ->with(Helpers::error_flash('Failed to create talk'))
                 ->withErrors(['title' => 'Talk with that title already exists'])
                 ->withInput(request()->all());
         }
 
         $talk->update([
             'slug' => $new_slug,
-            'title' => request('title'),
-            'link' => request('link'),
-            'description' => request('description'),
-            'speaker' => request('speaker'),
-            'thumbnail' => self::create_thumbnail_url(request('link')),
-            'tags' => collect(request('tags'))->pluck('value')->unique()->toArray(),
+            'title' => $data['title'],
+            'link' => $data['link'],
+            'description' => $data['description'],
+            'speaker' => $data['speaker'],
+            'thumbnail' => Helpers::create_thumbnail_url($data['link']),
+            'tags' => collect($data['tags'])->pluck('value')->unique()->toArray(),
         ]);
 
-        return to_route('talk.show', ['talk' => $new_slug])->with(['message' => 'Talk updated', 'type' => 'success']);
-    }
-
-    public function create()
-    {
-        return inertia('talk/create');
-    }
-
-    public function store()
-    {
-        request()->validate([
-            'title' => ['required', 'min:3', 'max:255'],
-            'link' => ['required', 'url'],
-        ]);
-
-        $slug = str(request('title'))->slug();
-
-        if (Talk::where('slug', $slug)->exists()) {
-            return back()
-                ->with(['message' => 'Failed to create talk', 'type' => 'error'])
-                ->withErrors(['title' => 'Talk with that title already exists'])
-                ->withInput(request()->all());
-        }
-
-        $talk = new Talk(request()->only(['title', 'link', 'speaker', 'description']));
-        $talk->tags = collect(request('tags'))->pluck('value')->unique()->toArray();
-        $talk->thumbnail = self::create_thumbnail_url($talk->link);
-        $talk->slug = $slug;
-        $talk->user_id = auth()->id();
-        $talk->save();
-
-        return to_route('talk.show', ['talk' => $slug])->with(['message' => 'Talk created', 'type' => 'success']);
-    }
-
-    private const BASE_URL = 'https://img.youtube.com';
-
-    private static function create_thumbnail_url(string $link): string
-    {
-        if (! Str::contains($link, ['youtube', 'youtu.be'], true)) {
-            return self::BASE_URL;
-        }
-
-        $parsed_url = parse_url($link);
-
-        $params = [];
-
-        if (isset($parsed_url['query'])) {
-            parse_str($parsed_url['query'], $params);
-        }
-
-        if (isset($params['v'])) {
-            $video_id = $params['v'];
-        } else {
-            $path = $parsed_url['path'] ?? '';
-            $segments = array_filter(explode('/', $path));
-            $video_id = end($segments);
-        }
-
-        if (empty($video_id)) {
-            return self::BASE_URL;
-        }
-
-        return self::BASE_URL."/vi/{$video_id}";
+        return to_route('talk.show', ['talk' => $new_slug])->with(Helpers::success_flash('Talk updated'));
     }
 }
