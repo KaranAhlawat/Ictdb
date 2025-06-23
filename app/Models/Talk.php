@@ -15,10 +15,13 @@ class Talk extends Model
         'link',
         'speaker',
         'description',
+        'thumbnail',
+        'slug',
     ];
 
     /**
      * Get the user that added this talk
+     *
      * @return BelongsTo<User, Talk>
      */
     public function user(): BelongsTo

@@ -32,5 +32,5 @@ Route::controller(TalkController::class)->name('talk.')->group(function () {
     Route::get('/talk/create', 'create')->name('create')->middleware('auth');
     Route::post('/talk/create', 'store')->name('store')->middleware('auth');
 
-    Route::get('/talk/{talk}', 'show')->name('show');
+    Route::get('/talk/{talk:slug}', 'show')->name('show');
 });

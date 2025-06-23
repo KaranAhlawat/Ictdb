@@ -6,7 +6,7 @@ import BaseLayout from '@/layouts/base-layout';
 import { talkSchema, TalkSchema } from '@/lib/schema/talk';
 import { postInertiaForm } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
+import { ChevronLeft, Loader2 } from 'lucide-react';
 import { ReactElement } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -81,9 +81,15 @@ export default function Create() {
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" className={"w-fit"} disabled={formState.isSubmitting}>
-                        {formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Add'}
-                    </Button>
+                    <div className={'flex justify-between'}>
+                        <Button variant={'ghost'} className={'w-fit'} type={'button'} onClick={() => window.history.back()}>
+                            <ChevronLeft />
+                            Back
+                        </Button>
+                        <Button type="submit" className={'w-fit'} disabled={formState.isSubmitting}>
+                            {formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Add'}
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </div>

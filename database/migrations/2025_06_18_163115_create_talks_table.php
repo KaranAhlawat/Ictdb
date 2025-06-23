@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('link');
+            $table->text('thumbnail');
+            $table->text('slug')->unique();
             $table->string('speaker')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
