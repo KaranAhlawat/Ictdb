@@ -25,7 +25,7 @@ export default function BaseLayout({ children }: { children: ReactNode }) {
 
     return (
         <RootLayout>
-            <div className="flex min-h-screen flex-col">
+            <div className="min-h-screen">
                 <Navbar
                     middle={
                         <div className={'mx-auto flex max-w-lg items-center justify-center gap-4'}>
@@ -64,7 +64,7 @@ export default function BaseLayout({ children }: { children: ReactNode }) {
                         </>
                     )}
                 </Navbar>
-                <main className={cn('grid flex-1 p-5', isAuthFormPage && 'place-items-center')}>{children}</main>
+                <main className={cn('grid pb-5', isAuthFormPage && 'place-items-center')}>{children}</main>
             </div>
         </RootLayout>
     );
