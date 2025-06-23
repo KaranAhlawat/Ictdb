@@ -20,7 +20,6 @@ class TalkController extends Controller
                 })
                 ->paginate(9)
                 ->withQueryString(),
-            'fields' => request()->only(['q']),
         ]);
     }
 

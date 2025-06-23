@@ -36,9 +36,7 @@ export default function Details({ talk }: DetailsProps) {
                     <div className={'flex gap-2'}>
                         {talk.tags.map((tag) => (
                             <Link key={tag} href={route('talk.index', { _query: { q: tag } })}>
-                                <Badge className={'min-w-16'}>
-                                    {tag}
-                                </Badge>
+                                <Badge className={'min-w-16'}>{tag}</Badge>
                             </Link>
                         ))}
                     </div>
@@ -52,12 +50,7 @@ export default function Details({ talk }: DetailsProps) {
                         </a>
                     </Button>
                 </div>
-                {talk.description ? (
-                    <>
-                        <h2 className={'text-xl font-semibold text-muted-foreground'}>Description</h2>
-                        <p className={'text-justify'}>{talk.description}</p>
-                    </>
-                ) : null}
+                {talk.description ? <p className={'text-justify font-serif'}>{talk.description}</p> : null}
                 <p className={'pt-10 text-sm text-muted-foreground'}>
                     Added by <span className={'text-primary'}>{talk.user.name}</span> on{' '}
                     <span className={'text-primary'}>
