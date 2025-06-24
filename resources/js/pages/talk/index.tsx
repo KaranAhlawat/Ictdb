@@ -6,7 +6,6 @@ import { PaginationData } from '@/types';
 import { Talk } from '@/types/domain';
 import { Link } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
-import { ReactElement } from 'react';
 
 interface TalkListProps {
     pagination: PaginationData<Talk>;
@@ -14,34 +13,34 @@ interface TalkListProps {
 
 export default function Index({ pagination: { data: talks, links, next_page_url, prev_page_url } }: TalkListProps) {
     return (
-        <div className={'mx-auto flex max-w-7xl min-w-4xl flex-col pt-4'}>
-            {/* New talk add */}
-            <Link className={'self-end'} href={route('talk.create')}>
-                <Button className={'flex flex-row items-center gap-2'}>
-                    <Plus />
-                    Add a talk
-                </Button>
-            </Link>
+        <BaseLayout>
+            <div className={'mx-auto flex max-w-7xl min-w-4xl flex-col pt-4'}>
+                {/* New talk add */}
+                <Link className={'self-end'} href={route('talk.create')}>
+                    <Button className={'flex flex-row items-center gap-2'}>
+                        <Plus />
+                        Add a talk
+                    </Button>
+                </Link>
 
-            {/* Talks grid */}
-            <div className={'py-4'}>
-                {talks.length ? (
-                    <ul className="grid grid-cols-1 gap-10 lg:grid-cols-3">
-                        {talks.map((talk) => (
-                            <TalkCard key={talk.id} talk={talk} />
-                        ))}
-                    </ul>
-                ) : (
-                    <h1 className={'text-center text-muted-foreground'}>
-                        <span className={'font-medium text-primary'}>Whoops!</span> Didn't find anything
-                    </h1>
-                )}
+                {/* Talks grid */}
+                <div className={'py-4'}>
+                    {talks.length ? (
+                        <ul className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+                            {talks.map((talk) => (
+                                <TalkCard key={talk.id} talk={talk} />
+                            ))}
+                        </ul>
+                    ) : (
+                        <h1 className={'text-center text-muted-foreground'}>
+                            <span className={'font-medium text-primary'}>Whoops!</span> Didn't find anything
+                        </h1>
+                    )}
+                </div>
+
+                {/* Pagination links */}
+                <AppPagination links={links} next_page_url={next_page_url} prev_page_url={prev_page_url} />
             </div>
-
-            {/* Pagination links */}
-            <AppPagination links={links} next_page_url={next_page_url} prev_page_url={prev_page_url} />
-        </div>
+        </BaseLayout>
     );
 }
-
-Index.layout = (p: ReactElement) => <BaseLayout children={p} />;

@@ -6,7 +6,6 @@ use App\Helpers;
 use App\Models\Tag;
 use App\Models\Talk;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class TalkController extends Controller
@@ -16,14 +15,19 @@ class TalkController extends Controller
         return inertia('talk/index', [
             'pagination' => Talk::query()
                 ->orderBy('created_at')
+                ->when(request('tags'), function ($query, $filter) {
+                    $query->whereHas('tags', function ($tag_query) use ($filter) {
+                        $tag_query->whereIn('name', explode(',', $filter));
+                    });
+                })
                 ->when(request('q'), function ($query, $filter) {
                     $query
-                        ->whereLike('title', "%{$filter}%")
-                        ->orWhereLike('speaker', "%{$filter}%")
-                        ->orWhereHas('tags', function ($tag_query) use ($filter) {
-                            $tag_query->where('name', 'like', "%{$filter}%");
+                        ->where(function ($where_clause) use ($filter) {
+                            $where_clause->whereLike('title', "%{$filter}%")
+                                ->orWhereLike('speaker', "%{$filter}%");
                         });
                 })
+                ->with('tags')
                 ->paginate(9)
                 ->withQueryString(),
         ]);
@@ -99,7 +103,7 @@ class TalkController extends Controller
 
         $new_slug = str($data['title'])->slug();
 
-        if ((string) $talk->slug !== (string) $new_slug && Talk::where('slug', $new_slug)->exists()) {
+        if ((string)$talk->slug !== (string)$new_slug && Talk::where('slug', $new_slug)->exists()) {
             return back()
                 ->with(Helpers::error_flash('Failed to create talk'))
                 ->withErrors(['title' => 'Talk with that title already exists'])
@@ -123,31 +127,21 @@ class TalkController extends Controller
 
     private function update_talk_tags($tags, Talk $talk): void
     {
-        DB::enableQueryLog();
         $tag_values = collect($tags)->pluck('value')->unique()->values();
 
         try {
             DB::transaction(function () use ($tag_values, $talk) {
                 // Make sure all the tags exist
-                Tag::upsert($tag_values->map(fn ($tag) => ['name' => $tag])->all(), ['name'], []);
-
-                // Get the IDs of the existing and new tags
-                $tag_ids = Tag::whereIn('name', $tag_values)->pluck('id');
+                Tag::upsert($tag_values->map(fn($tag) => ['name' => $tag])->all(), ['name'], []);
 
                 // Detach all tags
                 $talk->tags()->detach();
 
-                // Attach current IDs
-                $talk->tags()->attach($tag_ids);
+                // Attach currently given tags
+                $talk->tags()->attach($tag_values->all());
             });
         } catch (Throwable $e) {
-            logger()->error('Failed to update tags', [$e]);
-        } finally {
-            DB::disableQueryLog();
-            $queries = DB::getQueryLog();
-            foreach ($queries as $query) {
-                Log::info('SQL query: {query}', ['query' => $query]);
-            }
+            logger()->error('Failed to update tags', ['error' => $e]);
         }
     }
 }

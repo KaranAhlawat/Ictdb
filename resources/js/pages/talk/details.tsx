@@ -31,12 +31,12 @@ export default function Details({ talk }: DetailsProps) {
                     ) : null}
                 </div>
                 <img className={'aspect-auto w-full'} src={`${talk.thumbnail}/maxresdefault.jpg`} alt={'Talk image'} />
-                <div className={'flex items-center gap-6'}>
+                <div>
                     <h1 className={'text-3xl font-bold'}>{talk.title}</h1>
                     <div className={'flex gap-2'}>
                         {talk.tags.map((tag) => (
-                            <Link key={tag.id} href={route('talk.index', { _query: { q: tag } })}>
-                                <Badge className={'min-w-16'}>{tag.name}</Badge>
+                            <Link key={tag.name} href={route('talk.index', { _query: { q: tag.name } })}>
+                                <Badge className={'min-w-16'} variant={'default'}>{tag.name}</Badge>
                             </Link>
                         ))}
                     </div>

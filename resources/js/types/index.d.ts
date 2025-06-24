@@ -1,4 +1,5 @@
 import type { Config } from 'ziggy-js';
+import { Tag } from '@/types/domain';
 
 export interface Auth {
     user: User | undefined;
@@ -16,7 +17,8 @@ export interface SharedData {
         type: string | undefined;
     };
     url: string;
-
+    tags: Tag[];
+    filters: { [key: string]: string };
     [key: string]: unknown;
 }
 

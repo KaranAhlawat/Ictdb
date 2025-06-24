@@ -2,9 +2,7 @@ import { TalkSchema } from '@/lib/schema/talk';
 import { User } from '@/types/index';
 
 export interface Tag {
-    id: string;
     name: string;
-    count: string;
 }
 
 export interface Talk extends Omit<TalkSchema, 'tags'> {

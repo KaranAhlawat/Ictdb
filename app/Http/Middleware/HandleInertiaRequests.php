@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
@@ -49,6 +50,8 @@ class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+            'filters' => $request->only(['q', 'tags']),
+            'tags' => str_starts_with($request->path(), '/account') ? [] : Tag::all(),
         ];
     }
 }

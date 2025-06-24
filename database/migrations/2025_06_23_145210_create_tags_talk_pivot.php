@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Talk;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,10 +13,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tag_talk', function (Blueprint $table) {
-            $table->foreignId('tag_id')->constrained();
-            $table->foreignId('talk_id')->constrained();
+            $table->string('tag_name');
 
-            $table->primary(['tag_id', 'talk_id']);
+            $table->foreignId('talk_id')->constrained()->cascadeOnDelete();
+
+            $table->primary(['tag_name', 'talk_id']);
+            $table->foreign('tag_name')->references('name')->on('tags')->cascadeOnDelete();
         });
     }
 
