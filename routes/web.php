@@ -27,12 +27,15 @@ Route::middleware('guest')->controller(AccountController::class)->prefix('/callb
 });
 
 Route::controller(TalkController::class)->name('talk.')->group(function () {
-    Route::get('/', 'index')->name('index');
+    Route::middleware('auth')->prefix('/talk')->group(function () {
+        Route::get('/create', 'create')->name('create');
+        Route::post('/create', 'store')->name('store');
 
-    Route::get('/talk/create', 'create')->name('create')->middleware('auth');
-    Route::post('/talk/create', 'store')->name('store')->middleware('auth');
-    Route::get('/talk/{talk:slug}/edit', 'show_edit')->name('show.edit')->middleware('auth');
-    Route::post('/talk/{talk:slug}/edit', 'update')->name('update')->middleware('auth');
+        Route::get('/{talk:slug}/edit', 'edit')->name('show.edit');
+        Route::post('/{talk:slug}/edit', 'update')->name('update');
+    });
 
     Route::get('/talk/{talk:slug}', 'show')->name('show');
+    Route::get('/', 'index')->name('index');
+
 });

@@ -21,7 +21,11 @@ export default function Create() {
             tags: [],
         },
     });
-    const { fields: tags, append, remove } = useFieldArray({
+    const {
+        fields: tags,
+        append,
+        remove,
+    } = useFieldArray({
         name: 'tags',
         control: form.control,
     });
@@ -103,7 +107,7 @@ export default function Create() {
                             <FormItem>
                                 <FormLabel>Tags</FormLabel>
                                 <FormControl>
-                                    <div>
+                                    <div className={'flex flex-col gap-2'}>
                                         <div className={'flex flex-row gap-2'}>
                                             {tags.map((tag, index) => (
                                                 <div key={tag.id} className={'flex justify-between gap-2'}>

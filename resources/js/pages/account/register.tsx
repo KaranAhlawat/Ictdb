@@ -1,5 +1,5 @@
-import GithubButton from '@/components/GithubButton';
-import GoogleButton from '@/components/GoogleButton';
+import GithubButton from '@/components/github-button';
+import GoogleButton from '@/components/google-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
