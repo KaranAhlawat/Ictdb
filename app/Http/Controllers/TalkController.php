@@ -28,7 +28,7 @@ class TalkController extends Controller
                         });
                 })
                 ->with('tags')
-                ->paginate(3)
+                ->paginate(10)
                 ->withQueryString(),
         ]);
     }
@@ -132,7 +132,7 @@ class TalkController extends Controller
         try {
             DB::transaction(function () use ($tag_values, $talk) {
                 // Make sure all the tags exist
-                Tag::upsert($tag_values->map(fn ($tag) => ['name' => $tag])->all(), ['name'], []);
+                Tag::upsert($tag_values->map(fn($tag) => ['name' => $tag])->all(), ['name'], []);
 
                 // Detach all tags
                 $talk->tags()->detach();

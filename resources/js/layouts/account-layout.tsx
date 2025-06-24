@@ -1,3 +1,4 @@
+import HomeNavLink from '@/components/home-nav-link';
 import Navbar from '@/components/navbar';
 import { Button } from '@/components/ui/button';
 import RootLayout from '@/layouts/root';
@@ -26,32 +27,33 @@ export default function AccountLayout({ children }: { children: ReactNode }) {
     return (
         <RootLayout>
             <div className="min-h-screen">
-                <Navbar>
-                    {/* Just to align the content nicely */}
-                    <div className={'flex-1'}></div>
-                    {user ? (
-                        <>
-                            <Link href={route('account.show.dashboard')}>
-                                <p className="text-sm">
-                                    Hi, <span className="font-bold">{user.name}</span>
-                                </p>
-                            </Link>
-                            <form onSubmit={handleSubmit}>
-                                <Button type="submit" variant={'outline'} size={'icon'}>
-                                    <LogOut />
+                <Navbar className="flex items-center justify-between gap-2">
+                    <HomeNavLink />
+                    <div className="flex items-center gap-2">
+                        {user ? (
+                            <>
+                                <Link href={route('account.show.dashboard')}>
+                                    <p className="text-sm">
+                                        Hi, <span className="font-bold">{user.name}</span>
+                                    </p>
+                                </Link>
+                                <form onSubmit={handleSubmit}>
+                                    <Button type="submit" variant={'outline'} size={'icon'}>
+                                        <LogOut />
+                                    </Button>
+                                </form>
+                            </>
+                        ) : (
+                            <>
+                                <Button variant="secondary">
+                                    <Link href={route('account.show.login')}>Login</Link>
                                 </Button>
-                            </form>
-                        </>
-                    ) : (
-                        <>
-                            <Button variant="secondary">
-                                <Link href={route('account.show.login')}>Login</Link>
-                            </Button>
-                            <Button variant="secondary">
-                                <Link href={route('account.show.register')}>Register</Link>
-                            </Button>
-                        </>
-                    )}
+                                <Button variant="secondary">
+                                    <Link href={route('account.show.register')}>Register</Link>
+                                </Button>
+                            </>
+                        )}
+                    </div>
                 </Navbar>
                 <main className={cn('grid pb-5', isAuthFormPage && 'place-items-center')}>{children}</main>
             </div>

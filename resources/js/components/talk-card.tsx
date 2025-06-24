@@ -5,7 +5,7 @@ import { Talk } from '@/types/domain';
 import { Link } from '@inertiajs/react';
 import { SquareArrowOutUpRight } from 'lucide-react';
 
-const MAX_TAGS_ON_CARD = 2;
+const MAX_TAGS_ON_CARD = 3;
 
 export function TalkCard({ talk }: { talk: Talk }) {
     return (
@@ -17,18 +17,18 @@ export function TalkCard({ talk }: { talk: Talk }) {
             </CardHeader>
             <CardContent>
                 <Button variant={'link'} className={'px-0'}>
-                    <Link href={route('talk.show', { talk: talk.slug })} className={'font-bold'}>
+                    <Link href={route('talk.show', { talk: talk.slug })} className={'text-lg font-bold'}>
                         {talk.title}
                     </Link>
                 </Button>
                 <div className={'flex items-center gap-1'}>
                     {talk.tags.slice(0, MAX_TAGS_ON_CARD).map((tag) => (
-                        <Badge variant={'secondary'} key={tag.name}>
+                        <Badge variant={'secondary'} key={tag.name} className="text-md md:text-sm">
                             {tag.name}
                         </Badge>
                     ))}
                     {talk.tags.length > MAX_TAGS_ON_CARD ? (
-                        <span className={'text-xs text-muted-foreground'}>and {talk.tags.length - MAX_TAGS_ON_CARD} more</span>
+                        <span className={'text-muted-foreground md:text-xs'}>and {talk.tags.length - MAX_TAGS_ON_CARD} more</span>
                     ) : null}
                 </div>
             </CardContent>

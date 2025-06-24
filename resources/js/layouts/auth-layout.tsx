@@ -1,3 +1,4 @@
+import HomeNavLink from '@/components/home-nav-link';
 import Navbar from '@/components/navbar';
 import { Button } from '@/components/ui/button';
 import { Link } from '@inertiajs/react';
@@ -8,7 +9,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     return (
         <RootLayout>
             <div className="flex min-h-screen flex-col">
-                <Navbar>
+                <Navbar className="flex items-center justify-between">
+                    <HomeNavLink />
                     <div className={'flex-1'}></div>
                     <Button variant="outline">
                         <Link href={route('talk.index')}>

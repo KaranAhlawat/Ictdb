@@ -49,7 +49,7 @@ export default function Edit({ talk }: EditProps) {
 
     return (
         <BaseLayout>
-            <div className={'mr-auto ml-10 w-full max-w-lg pt-10'}>
+            <div className={'ml-5 max-w-lg pt-10 sm:ml-10 lg:mr-auto lg:w-full'}>
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(postInertiaForm(route('talk.update', { talk: talk.slug }), form))}
@@ -104,7 +104,7 @@ export default function Edit({ talk }: EditProps) {
                                 <FormItem>
                                     <FormLabel>Description</FormLabel>
                                     <FormControl>
-                                        <Textarea {...field} placeholder={''} />
+                                        <Textarea {...field} placeholder={''} rows={5} />
                                     </FormControl>
                                     <FormDescription>A description for the talk</FormDescription>
                                     <FormMessage />
@@ -119,7 +119,7 @@ export default function Edit({ talk }: EditProps) {
                                     <FormLabel>Tags</FormLabel>
                                     <FormControl>
                                         <div className={'flex flex-col gap-2'}>
-                                            <div className={'flex flex-row gap-2'}>
+                                            <div className={'flex flex-row flex-wrap gap-2'}>
                                                 {tags.map((tag, index) => (
                                                     <div key={tag.id} className={'flex justify-between gap-2'}>
                                                         <Badge className={'flex items-center p-2 py-1'}>

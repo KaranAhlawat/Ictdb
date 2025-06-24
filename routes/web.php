@@ -1,41 +1,22 @@
 <?php
 
-use App\Http\Controllers\AccountController;
 use App\Http\Controllers\TalkController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')->controller(AccountController::class)->name('account.')->prefix('/account')->group(function () {
-    Route::get('/dashboard', 'show_dashboard')->name('show.dashboard');
-    Route::post('/logout', 'logout')->name('logout');
-});
-
-Route::middleware('guest')->controller(AccountController::class)->name('account.')->prefix('/account')->group(function () {
-    Route::get('/register', 'show_register')->name('show.register');
-    Route::post('/register', 'register')->name('register');
-
-    Route::get('/login', 'show_login')->name('show.login');
-    Route::post('/login', 'login')->name('login');
-
-    Route::get('/google', 'google')->name('google');
-
-    Route::get('/github', 'github')->name('github');
-});
-
-Route::middleware('guest')->controller(AccountController::class)->prefix('/callback')->group(function () {
-    Route::get('/google', 'google_callback')->name('google.callback');
-    Route::get('/github', 'github_callback')->name('github.callback');
-});
+Route::get('/', fn() => to_route('talk.index'));
 
 Route::controller(TalkController::class)->name('talk.')->group(function () {
     Route::middleware('auth')->prefix('/talk')->group(function () {
+        Route::get('', 'index')->name('index')->withoutMiddleware('auth');
+
         Route::get('/create', 'create')->name('create');
-        Route::post('/create', 'store')->name('store');
+        Route::post('', 'store')->name('store');
 
         Route::get('/{talk:slug}/edit', 'edit')->name('show.edit');
-        Route::post('/{talk:slug}/edit', 'update')->name('update');
+        Route::post('/{talk:slug}', 'update')->name('update');
+
+        Route::get('/{talk:slug}', 'show')->name('show')->withoutMiddleware('auth');
     });
-
-    Route::get('/talk/{talk:slug}', 'show')->name('show');
-    Route::get('/', 'index')->name('index');
-
 });
+
+require __DIR__ . '/auth_routes.php';

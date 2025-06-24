@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Moon, Sun } from 'lucide-react';
+import { LaptopMinimal, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function ModeToggle() {
@@ -26,9 +26,15 @@ export default function ModeToggle() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setThemeState('theme-light')}>Light</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setThemeState('dark')}>Dark</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setThemeState('system')}>System</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setThemeState('theme-light')}>
+                    <Sun className="h-[1.2rem] w-[1.2rem]" /> Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setThemeState('dark')}>
+                    <Moon className="h-[1.2rem] w-[1.2rem]" /> Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setThemeState('system')}>
+                    <LaptopMinimal className="h-[1.2rem] w-[1.2rem]" /> System
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
