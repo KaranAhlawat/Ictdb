@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -51,7 +52,7 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
             'filters' => $request->only(['q', 'tags']),
-            'tags' => str_starts_with($request->path(), '/account') ? [] : Tag::all(),
+            'tags' => str(request()->path())->startsWith('/account') ? [] : Tag::all(),
         ];
     }
 }

@@ -14,7 +14,7 @@ interface TalkListProps {
 export default function Index({ pagination: { data: talks, links, next_page_url, prev_page_url } }: TalkListProps) {
     return (
         <BaseLayout>
-            <div className={'mx-auto flex max-w-7xl min-w-4xl flex-col pt-4'}>
+            <div className={'mx-auto flex max-w-7xl flex-col pt-4 xl:min-w-4xl'}>
                 {/* New talk add */}
                 <Link className={'self-end'} href={route('talk.create')}>
                     <Button className={'flex flex-row items-center gap-2'}>
@@ -26,7 +26,7 @@ export default function Index({ pagination: { data: talks, links, next_page_url,
                 {/* Talks grid */}
                 <div className={'py-4'}>
                     {talks.length ? (
-                        <ul className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+                        <ul className="grid grid-cols-1 gap-10 md:grid-cols-2 xl:grid-cols-3">
                             {talks.map((talk) => (
                                 <TalkCard key={talk.id} talk={talk} />
                             ))}

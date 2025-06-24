@@ -9,6 +9,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <RootLayout>
             <div className="flex min-h-screen flex-col">
                 <Navbar>
+                    <div className={'flex-1'}></div>
                     <Button variant="outline">
                         <Link href={route('talk.index')}>
                             <Home />
