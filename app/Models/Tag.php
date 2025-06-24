@@ -14,6 +14,6 @@ class Tag extends Model
 
     public function talks(): BelongsToMany
     {
-        return $this->belongsToMany(Talk::class)->using(TagTalk::class);
+        return $this->belongsToMany(Talk::class);
     }
 }

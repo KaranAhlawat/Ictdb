@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Helpers;
 use App\Models\Tag;
-use App\Models\TagTalk;
 use App\Models\Talk;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class TalkController extends Controller
@@ -123,6 +123,7 @@ class TalkController extends Controller
 
     private function update_talk_tags($tags, Talk $talk): void
     {
+        DB::enableQueryLog();
         $tag_values = collect($tags)->pluck('value')->unique()->values();
 
         try {
@@ -133,17 +134,20 @@ class TalkController extends Controller
                 // Get the IDs of the existing and new tags
                 $tag_ids = Tag::whereIn('name', $tag_values)->pluck('id');
 
-                // Create rows to insert into pivot table
-                $tag_talk_rows = $tag_ids->map(fn ($tag) => ['tag_id' => $tag, 'talk_id' => $talk->id]);
+                // Detach all tags
+                $talk->tags()->detach();
 
-                // Delete all existing tags for talk
-                TagTalk::query()->where('talk_id', $talk->id)->delete();
-
-                // Insert all new tags for talk
-                TagTalk::query()->insert($tag_talk_rows->all());
+                // Attach current IDs
+                $talk->tags()->attach($tag_ids);
             });
         } catch (Throwable $e) {
             logger()->error('Failed to update tags', [$e]);
+        } finally {
+            DB::disableQueryLog();
+            $queries = DB::getQueryLog();
+            foreach ($queries as $query) {
+                Log::info('SQL query: {query}', ['query' => $query]);
+            }
         }
     }
 }
