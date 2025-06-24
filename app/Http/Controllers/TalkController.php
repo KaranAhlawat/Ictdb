@@ -103,7 +103,7 @@ class TalkController extends Controller
 
         $new_slug = str($data['title'])->slug();
 
-        if ((string)$talk->slug !== (string)$new_slug && Talk::where('slug', $new_slug)->exists()) {
+        if ((string) $talk->slug !== (string) $new_slug && Talk::where('slug', $new_slug)->exists()) {
             return back()
                 ->with(Helpers::error_flash('Failed to create talk'))
                 ->withErrors(['title' => 'Talk with that title already exists'])
@@ -132,7 +132,7 @@ class TalkController extends Controller
         try {
             DB::transaction(function () use ($tag_values, $talk) {
                 // Make sure all the tags exist
-                Tag::upsert($tag_values->map(fn($tag) => ['name' => $tag])->all(), ['name'], []);
+                Tag::upsert($tag_values->map(fn ($tag) => ['name' => $tag])->all(), ['name'], []);
 
                 // Detach all tags
                 $talk->tags()->detach();

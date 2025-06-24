@@ -49,7 +49,6 @@ class User extends Authenticatable
 
     /**
      * Get all the talks a user has added
-     * @return HasMany
      */
     public function talks(): HasMany
     {
