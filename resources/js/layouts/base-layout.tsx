@@ -10,7 +10,7 @@ import { SharedData } from '@/types';
 import { Tag } from '@/types/domain';
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { LogOut, Menu } from 'lucide-react';
-import { FormEvent, ReactNode, useState } from 'react';
+import { FormEvent, ReactNode, useState, type ChangeEvent } from 'react';
 
 function SearchAndFilter({ filters, tags }: { filters: Record<string, string>; tags: Tag[] }) {
     return (
@@ -20,7 +20,7 @@ function SearchAndFilter({ filters, tags }: { filters: Record<string, string>; t
                 placeholder={'Search by title or speaker'}
                 name={'q'}
                 defaultValue={filters.q ?? ''}
-                onChange={debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={debounce((e: ChangeEvent<HTMLInputElement>) => {
                     const params: Record<string, string> = {};
                     if (filters.tags) {
                         params['tags'] = filters.tags;
@@ -90,10 +90,10 @@ export default function BaseLayout({ children }: { children: ReactNode }) {
                                 </>
                             ) : (
                                 <>
-                                    <Button variant="secondary">
+                                    <Button variant="link">
                                         <Link href={route('account.show.login')}>Login</Link>
                                     </Button>
-                                    <Button variant="secondary">
+                                    <Button variant="link">
                                         <Link href={route('account.show.register')}>Register</Link>
                                     </Button>
                                 </>
@@ -130,10 +130,10 @@ export default function BaseLayout({ children }: { children: ReactNode }) {
                             </>
                         ) : (
                             <>
-                                <Button variant="secondary">
+                                <Button variant="link">
                                     <Link href={route('account.show.login')}>Login</Link>
                                 </Button>
-                                <Button variant="secondary">
+                                <Button variant="link">
                                     <Link href={route('account.show.register')}>Register</Link>
                                 </Button>
                             </>
