@@ -15,7 +15,7 @@ export function TalkCard({ talk }: { talk: Talk }) {
                     <img className={'w-full rounded-t-lg'} src={`${talk.thumbnail}/hqdefault.jpg`} alt={'Talk image'} />
                 </Link>
             </CardHeader>
-            <CardContent>
+            <CardContent className={"flex-1"}>
                 <Button variant={'link'} className={'px-0'}>
                     <Link href={route('talk.show', { talk: talk.slug })} className={'text-lg font-bold'}>
                         {talk.title}
