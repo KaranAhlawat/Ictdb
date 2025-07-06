@@ -28,7 +28,7 @@ export default function Login() {
             <Card>
                 <CardHeader className={'text-center'}>
                     <CardTitle className={'text-xl'}>Welcome Back</CardTitle>
-                    <CardDescription>Login into your account</CardDescription>
+                    <CardDescription>Login to your account</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -60,14 +60,14 @@ export default function Login() {
                                         </FormItem>
                                     )}
                                 />
+                                <Button type="submit" className="w-full" disabled={formState.isSubmitting}>
+                                    {formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Login'}
+                                </Button>
                             </div>
                         </form>
                     </Form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">
-                    <Button type="submit" className="w-full" disabled={formState.isSubmitting}>
-                        {formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Login'}
-                    </Button>
                     <p className="text-sm text-muted-foreground">
                         Don't have an account?{' '}
                         <Button variant="link" className="text-primary" size={'sm'} disabled={formState.isSubmitting}>

@@ -29,8 +29,7 @@ export default function Register() {
         <div className="mx-auto w-full max-w-md">
             <Card>
                 <CardHeader className={'text-center'}>
-                    <CardTitle className={'text-xl'}>Sign Up</CardTitle>
-                    <CardDescription>Just</CardDescription>
+                    <CardTitle className={'text-xl'}>Register</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
@@ -88,14 +87,14 @@ export default function Register() {
                                         </FormItem>
                                     )}
                                 />
+                                <Button type="submit" className="w-full" disabled={formState.isSubmitting}>
+                                    {formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Register'}
+                                </Button>
                             </div>
                         </form>
                     </Form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-2">
-                    <Button type="submit" className="w-full" disabled={formState.isSubmitting}>
-                        {formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Register'}
-                    </Button>
                     <p className="text-sm text-muted-foreground">
                         Already have an account?{' '}
                         <Button variant="link" className="text-primary" size={'sm'} disabled={formState.isSubmitting}>

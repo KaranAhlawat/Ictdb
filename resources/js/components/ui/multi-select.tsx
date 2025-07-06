@@ -194,13 +194,14 @@ export const MultiSelect = React.forwardRef<
                 onOpenChange={setIsPopoverOpen}
                 modal={modalPopover}
             >
-                <PopoverTrigger asChild={asChild}>
+                <PopoverTrigger asChild={asChild} className={'outline-none'} tabIndex={-1}>
                     <Button
                         ref={ref}
                         {...props}
                         onClick={handleTogglePopover}
                         className={cn(
-                            'flex w-full p-1 rounded-md border min-h-10 h-auto items-center justify-between bg-inherit hover:bg-inherit [&_svg]:pointer-events-auto',
+                            'flex w-full p-1 rounded-md border min-h-9 h-auto items-center justify-between bg-inherit hover:bg-inherit [&_svg]:pointer-events-auto',
+                            "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
                             className
                         )}
                     >
@@ -272,7 +273,7 @@ export const MultiSelect = React.forwardRef<
                             </div>
                         ) : (
                             <div className="flex items-center justify-between w-full mx-auto">
-                <span className="text-sm text-muted-foreground mx-3">
+                <span className="text-sm text-muted-foreground mx-3 font-light">
                   {placeholder}
                 </span>
                                 <ChevronDown className="h-4 cursor-pointer text-muted-foreground mx-2" />

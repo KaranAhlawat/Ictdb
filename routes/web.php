@@ -3,7 +3,7 @@
 use App\Http\Controllers\TalkController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn() => to_route('talk.index'));
+Route::get('/', fn () => to_route('talk.index'));
 
 Route::controller(TalkController::class)->name('talk.')->group(function () {
     Route::middleware('auth')->prefix('/talk')->group(function () {
@@ -19,4 +19,4 @@ Route::controller(TalkController::class)->name('talk.')->group(function () {
     });
 });
 
-require __DIR__ . '/auth_routes.php';
+require __DIR__.'/auth_routes.php';

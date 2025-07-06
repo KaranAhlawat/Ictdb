@@ -1,20 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useAppearance } from '@/lib/use-appearance';
 import { LaptopMinimal, Moon, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 export default function ModeToggle() {
-    const [theme, setThemeState] = useState<'theme-light' | 'dark' | 'system'>('theme-light');
-
-    useEffect(() => {
-        const isDarkMode = document.documentElement.classList.contains('dark');
-        setThemeState(isDarkMode ? 'dark' : 'theme-light');
-    }, []);
-
-    useEffect(() => {
-        const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        document.documentElement.classList[isDark ? 'add' : 'remove']('dark');
-    }, [theme]);
+    const { updateAppearance } = useAppearance();
 
     return (
         <DropdownMenu>
@@ -26,13 +16,13 @@ export default function ModeToggle() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setThemeState('theme-light')} className={"dark:hover:[&>svg]:stroke-primary-foreground"}>
+                <DropdownMenuItem onClick={() => updateAppearance('light')} className={'dark:hover:[&>svg]:stroke-primary-foreground'}>
                     <Sun /> Light
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setThemeState('dark')} className={"dark:hover:[&>svg]:stroke-primary-foreground"}>
+                <DropdownMenuItem onClick={() => updateAppearance('dark')} className={'dark:hover:[&>svg]:stroke-primary-foreground'}>
                     <Moon /> Dark
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setThemeState('system')} className={"dark:hover:[&>svg]:stroke-primary-foreground"}>
+                <DropdownMenuItem onClick={() => updateAppearance('system')} className={'dark:hover:[&>svg]:stroke-primary-foreground'}>
                     <LaptopMinimal /> System
                 </DropdownMenuItem>
             </DropdownMenuContent>
