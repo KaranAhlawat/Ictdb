@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use App\Models\Tag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
