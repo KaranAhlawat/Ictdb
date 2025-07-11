@@ -10,18 +10,16 @@ const MAX_TAGS_ON_CARD = 3;
 export function TalkCard({ talk }: { talk: Talk }) {
     return (
         <Card className="flex flex-col justify-between gap-0 pt-0 lg:min-w-sm">
-            <CardHeader className={'p-0'}>
+            <CardHeader className={'px-0'}>
                 <Link href={route('talk.show', { talk: talk.slug })}>
-                    <img className={'w-full rounded-t-lg'} src={`${talk.thumbnail}/hqdefault.jpg`} alt={'Talk image'} />
+                    <img className={'h-full w-full rounded-t-xl object-cover'} src={`${talk.thumbnail}/hqdefault.jpg`} alt={'Talk image'} />
                 </Link>
             </CardHeader>
-            <CardContent className={'flex-1'}>
-                <Button variant={'link'} className={'px-0'}>
-                    <Link href={route('talk.show', { talk: talk.slug })} className={'text-lg font-bold'}>
-                        {talk.title}
-                    </Link>
-                </Button>
-                <div className={'flex items-center gap-1'}>
+            <CardContent className={'flex flex-1 flex-col gap-1'}>
+                <Link href={route('talk.show', { talk: talk.slug })} className={'text-lg font-bold'}>
+                    {talk.title}
+                </Link>
+                <div className={'flex items-center gap-1.5'}>
                     {talk.tags.slice(0, MAX_TAGS_ON_CARD).map((tag) => (
                         <Badge variant={'secondary'} key={tag.name} className="text-md md:text-sm">
                             {tag.name}

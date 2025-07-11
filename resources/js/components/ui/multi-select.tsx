@@ -1,22 +1,12 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import {
-    CheckIcon,
-    XCircle,
-    ChevronDown,
-    XIcon,
-    WandSparkles
-} from 'lucide-react';
+import { CheckIcon, ChevronDown, WandSparkles, XCircle, XIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
     Command,
     CommandEmpty,
@@ -201,7 +191,7 @@ export const MultiSelect = React.forwardRef<
                         onClick={handleTogglePopover}
                         className={cn(
                             'flex w-full p-1 rounded-md border min-h-9 h-auto items-center justify-between bg-inherit hover:bg-inherit [&_svg]:pointer-events-auto',
-                            "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                            'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
                             className
                         )}
                     >
