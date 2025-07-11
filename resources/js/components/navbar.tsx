@@ -1,18 +1,12 @@
-import ModeToggle from '@/components/mode-toggle';
-import { Link } from '@inertiajs/react';
+import { cn } from '@/lib/utils';
 import type { ReactNode } from 'react';
 
-export default function Navbar({ children }: { children?: ReactNode }) {
+export default function Navbar({ children, className }: { children?: ReactNode; className?: string }) {
     return (
-        <nav className="sticky top-0 flex items-center gap-x-4 bg-muted p-4">
-            <Link href={route('talk.index')}>
-                <h1 className="text-xl font-bold">
-                    <span className="mr-2 bg-primary px-2 py-1 text-primary-foreground">ict</span>
-                    db
-                </h1>
-            </Link>
+        <nav
+            className={cn('sticky top-0 border-b bg-background/75 p-4 shadow-sm backdrop-blur-2xl backdrop-saturate-200 backdrop-filter', className)}
+        >
             {children}
-            <ModeToggle />
         </nav>
     );
 }

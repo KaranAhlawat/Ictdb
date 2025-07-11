@@ -1,4 +1,4 @@
-import BaseLayout from '@/layouts/base-layout';
+import AccountLayout from '@/layouts/account-layout';
 import { ReactElement } from 'react';
 
 export default function Dashboard() {
@@ -9,4 +9,4 @@ export default function Dashboard() {
     );
 }
 
-Dashboard.layout = (p: ReactElement) => <BaseLayout children={p} />;
+Dashboard.layout = (p: ReactElement) => <AccountLayout children={p} />;

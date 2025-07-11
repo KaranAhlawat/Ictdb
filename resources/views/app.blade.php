@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
 
 <head>
     <meta charset="utf-8">
@@ -23,11 +23,11 @@
     {{-- Inline style to set the HTML background color based on our theme in app.css --}}
     <style>
         html {
-            background-color: oklch(1 0 0);
+            background-color: oklch(0.9513 0.0074 260.7315);
         }
 
         html.dark {
-            background-color: oklch(0.145 0 0);
+            background-color: oklch(0.3244 0.0229 264.1820);
         }
     </style>
 
@@ -37,8 +37,11 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
 
     @routes
     @viteReactRefresh
@@ -47,7 +50,13 @@
 </head>
 
 <body class="font-sans antialiased">
-    @inertia
+@inertia
+@if (config('app.debug'))
+    <script>
+        PhpDebugBar.DebugBar.prototype.recomputeBottomOffset = () => {
+        };
+    </script>
+@endif
 </body>
 
 </html>
