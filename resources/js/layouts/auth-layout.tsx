@@ -4,9 +4,10 @@ import Navbar from '@/components/navbar';
 import { Button } from '@/components/ui/button';
 import { Link } from '@inertiajs/react';
 import { Home } from 'lucide-react';
+import type { ReactNode } from 'react';
 import RootLayout from './root';
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({ children }: { children: ReactNode }) {
     return (
         <RootLayout>
             <div className="flex min-h-screen flex-col">

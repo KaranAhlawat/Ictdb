@@ -21,6 +21,7 @@ export default function Create() {
             tags: [],
         },
     });
+
     const {
         fields: tags,
         append,
