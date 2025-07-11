@@ -17,8 +17,8 @@ export default function Details({ talk }: DetailsProps) {
 
     return (
         <BaseLayout>
-            <div className={'grid grid-cols-1 place-items-center pt-4'}>
-                <div className={'mx-auto flex max-w-4xl min-w-2xl flex-col gap-6'}>
+            <div className={'flex flex-col items-center pt-4'}>
+                <div className={'mx-auto flex max-w-4xl flex-col gap-6 md:min-w-2xl'}>
                     <div className={'flex justify-between'}>
                         <Button variant={'ghost'} className={'w-fit'} onClick={() => window.history.back()}>
                             <ChevronLeft />
@@ -30,7 +30,7 @@ export default function Details({ talk }: DetailsProps) {
                             </Link>
                         ) : null}
                     </div>
-                    <img className={'aspect-auto w-full'} src={`${talk.thumbnail}/maxresdefault.jpg`} alt={'Talk image'} />
+                    <img className={''} src={`${talk.thumbnail}/maxresdefault.jpg`} alt={'Talk image'} />
                     <div>
                         <h1 className={'text-3xl font-bold'}>{talk.title}</h1>
                         <div className={'flex gap-2'}>
@@ -43,16 +43,16 @@ export default function Details({ talk }: DetailsProps) {
                             ))}
                         </div>
                     </div>
-                    <div className={'items-place flex w-full items-center justify-between'}>
+                    <div className={'items-place flex w-full flex-row items-center justify-between gap-2'}>
                         <p className={'font-semibold text-muted-foreground italic'}>by {talk.speaker ?? 'unknown'}</p>
-                        <Button variant={'outline'} className={'self-end'}>
+                        <Button variant={'outline'} className={'md:self-end'}>
                             <a href={talk.link} target={'_blank'} rel={'noopener noreferrer'} className={'flex gap-2'}>
                                 Watch
                                 <SquareArrowOutUpRight />
                             </a>
                         </Button>
                     </div>
-                    {talk.description ? <p className={'text-justify'}>{talk.description}</p> : null}
+                    {talk.description ? <p className={'justify-text'}>{talk.description}</p> : null}
                     <p className={'pt-10 text-sm text-muted-foreground'}>
                         Added by <span className={'text-primary'}>{talk.user.name}</span> on{' '}
                         <span className={'text-primary'}>

@@ -28,7 +28,7 @@ class TalkController extends Controller
                         });
                 })
                 ->with('tags')
-                ->paginate(10)
+                ->paginate(9)
                 ->withQueryString(),
         ]);
     }

@@ -3,19 +3,20 @@ import ModeToggle from '@/components/mode-toggle';
 import Navbar from '@/components/navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MultiSelect } from '@/components/ui/multi-select';
+import MultipleSelector, { Option } from '@/components/ui/multiselect';
 import RootLayout from '@/layouts/root';
 import { cn, debounce } from '@/lib/utils';
 import { SharedData } from '@/types';
 import { Tag } from '@/types/domain';
 import { Link, router, useForm, usePage } from '@inertiajs/react';
 import { LogOut, Menu } from 'lucide-react';
-import { FormEvent, ReactNode, useState, type ChangeEvent } from 'react';
+import { type ChangeEvent, FormEvent, ReactNode, useState } from 'react';
 
 function SearchAndFilter({ filters, tags }: { filters: Record<string, string>; tags: Tag[] }) {
     return (
         <>
             <Input
+                className={'placeholder:text-sm placeholder:text-muted-foreground/70'}
                 type={'text'}
                 placeholder={'Search by title or speaker'}
                 name={'q'}
@@ -29,20 +30,24 @@ function SearchAndFilter({ filters, tags }: { filters: Record<string, string>; t
                     router.get(route('talk.index'), params, { replace: true, preserveState: true });
                 }, 200)}
             />
-            <MultiSelect
-                options={tags?.map((t) => ({ label: t.name, value: t.name }))}
-                defaultValue={filters.tags?.split(',') ?? []}
-                onValueChange={debounce((values: string[]) => {
+            <MultipleSelector
+                commandProps={{
+                    label: 'Select frameworks',
+                }}
+                value={(filters.tags?.split(',') ?? []).map((t) => ({ value: t, label: t }))}
+                onChange={debounce((values: Option[]) => {
                     const params: Record<string, string> = {};
                     if (filters.q) {
                         params['q'] = filters.q;
                     }
-                    params['tags'] = values.join(',');
+                    params['tags'] = values.map((o) => o.value).join(',');
                     router.get(route('talk.index'), params, { replace: true, preserveState: true });
                 }, 200)}
-                className={'min-w-sm md:min-w-md'}
-                placeholder={'Filter by tags'}
-                maxCount={3}
+                defaultOptions={tags?.map((t) => ({ label: t.name, value: t.name }))}
+                placeholder="Filter by tags"
+                hidePlaceholderWhenSelected
+                className={'border-input bg-transparent dark:bg-input/30'}
+                emptyIndicator={<p className="text-center text-sm">No results found</p>}
             />
         </>
     );

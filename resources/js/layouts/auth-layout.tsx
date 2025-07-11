@@ -16,7 +16,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                     <ModeToggle />
                     <Button variant="outline" className={'px-2'}>
                         <Link href={route('talk.index')}>
-                            <Home stroke={'var(--muted-foreground)'} />
+                            <Home />
                         </Link>
                     </Button>
                 </Navbar>
