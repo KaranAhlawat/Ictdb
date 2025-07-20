@@ -4,7 +4,10 @@ use App\Http\Controllers\AccountController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->controller(AccountController::class)->name('account.')->prefix('/account')->group(function () {
-    Route::get('/dashboard', 'show_dashboard')->name('show.dashboard');
+    Route::name('dashboard.')->prefix('/dashboard')->group(function () {
+        Route::get('', 'show_dashboard')->name('show');
+        Route::get('/contributions', 'show_contributions')->name('contributions');
+    });
     Route::post('/logout', 'logout')->name('logout');
 });
 

@@ -15,6 +15,8 @@ Route::controller(TalkController::class)->name('talk.')->group(function () {
         Route::get('/{talk:slug}/edit', 'edit')->name('show.edit');
         Route::post('/{talk:slug}', 'update')->name('update');
 
+        Route::delete('/{talk:slug}', 'destroy')->name('destroy');
+
         Route::get('/{talk:slug}', 'show')->name('show')->withoutMiddleware('auth');
     });
 });

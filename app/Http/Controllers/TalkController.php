@@ -6,6 +6,7 @@ use App\Helpers;
 use App\Models\Tag;
 use App\Models\Talk;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Throwable;
 
 class TalkController extends Controller
@@ -85,6 +86,24 @@ class TalkController extends Controller
         return inertia('talk/edit', [
             'talk' => $talk->load(['tags']),
         ]);
+    }
+
+    public function destroy(Talk $talk)
+    {
+        if (auth()->user()->id !== $talk->user_id) {
+            abort(403);
+        }
+
+        if ($talk->delete()) {
+            $prev = URL::previous();
+            if (str_contains($prev, 'contributions')) {
+                return redirect()->back()->with(Helpers::success_flash('Talk deleted'));
+            }
+
+            return to_route('talk.index')->with(Helpers::success_flash('Talk deleted'));
+        }
+
+        return redirect()->back()->with(Helpers::error_flash('Failed to delete talk'));
     }
 
     public function update(Talk $talk)

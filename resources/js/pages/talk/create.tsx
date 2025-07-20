@@ -45,7 +45,7 @@ export default function Create() {
         <BaseLayout>
             <div className={'ml-2 max-w-lg pt-10 sm:ml-10 lg:mr-auto lg:w-full'}>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(postInertiaForm(route('talk.create'), form))} className={'flex flex-col gap-8'}>
+                    <form onSubmit={form.handleSubmit(postInertiaForm(route('talk.store'), form))} className={'flex flex-col gap-8'}>
                         <FormField
                             control={form.control}
                             name={'title'}

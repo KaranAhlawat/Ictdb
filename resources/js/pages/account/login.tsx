@@ -12,7 +12,7 @@ import { Link } from '@inertiajs/react';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-export default function Login() {
+function Login() {
     const form = useForm<LoginSchema>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -88,3 +88,5 @@ export default function Login() {
 }
 
 Login.layout = (page: React.ReactNode) => <AuthLayout children={page} />;
+
+export default Login;

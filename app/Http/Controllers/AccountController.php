@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Talk;
 use App\Models\User;
 use Inertia\Inertia;
 use Laravel\Socialite\Facades\Socialite;
@@ -123,5 +124,10 @@ class AccountController extends Controller
     public function show_dashboard()
     {
         return inertia('account/dashboard');
+    }
+
+    public function show_contributions()
+    {
+        return inertia('account/contributions', ['talks' => Talk::whereUserId(auth()->id())->get()]);
     }
 }

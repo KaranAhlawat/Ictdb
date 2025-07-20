@@ -12,7 +12,7 @@ import { Link } from '@inertiajs/react';
 import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-export default function Register() {
+function Register() {
     const form = useForm<RegisterSchema>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
@@ -115,3 +115,5 @@ export default function Register() {
 }
 
 Register.layout = (page: React.ReactNode) => <AuthLayout children={page} />;
+
+export default Register;
