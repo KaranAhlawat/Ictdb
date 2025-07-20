@@ -2,10 +2,10 @@ import HomeNavLink from '@/components/home-nav-link';
 import ModeToggle from '@/components/mode-toggle';
 import Navbar from '@/components/navbar';
 import { Button } from '@/components/ui/button';
+import RootLayout from '@/layouts/root';
 import { Link } from '@inertiajs/react';
 import { Home } from 'lucide-react';
-import type { ReactNode } from 'react';
-import RootLayout from './root';
+import { type ReactNode } from 'react';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
     return (

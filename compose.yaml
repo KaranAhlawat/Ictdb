@@ -3,7 +3,7 @@ services:
         image: postgres:latest
         environment:
             - POSTGRES_USER=ictdb
-            - POSTGRES_PASSWORD=ictdb
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
             - POSTGRES_DB=ictdb
         ports:
             - "5432:5432"
@@ -13,4 +13,3 @@ services:
 
 volumes:
     postgres_data:
-        driver: local

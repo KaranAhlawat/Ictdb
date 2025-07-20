@@ -1,61 +1,30 @@
+import { AccountLinks } from '@/components/account-links';
 import HomeNavLink from '@/components/home-nav-link';
+import ModeToggle from '@/components/mode-toggle';
 import Navbar from '@/components/navbar';
-import { Button } from '@/components/ui/button';
 import RootLayout from '@/layouts/root';
-import { cn } from '@/lib/utils';
-import { SharedData } from '@/types';
-import { Link, useForm, usePage } from '@inertiajs/react';
-import { LogOut } from 'lucide-react';
-import { FormEvent, ReactNode } from 'react';
+import { ReactNode, useCallback, useState } from 'react';
 
-export default function AccountLayout({ children }: { children: ReactNode }) {
-    const page = usePage<SharedData>();
-    const {
-        auth: { user },
-        ziggy: { location },
-    } = page.props;
+export default function AccountLayout({ children }: { children: ((height: number) => ReactNode) | ReactNode }) {
+    const [navHeight, setNavHeight] = useState(0);
 
-    const form = useForm();
-
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        form.post(route('account.logout'));
-    };
-
-    const isAuthFormPage = location.endsWith('login') || location.endsWith('register');
+    const measureNav = useCallback((nav: HTMLElement | null) => {
+        if (nav) {
+            setNavHeight(nav.getBoundingClientRect().height);
+        }
+    }, []);
 
     return (
         <RootLayout>
             <div className="min-h-screen">
-                <Navbar className="flex items-center justify-between gap-2">
+                <Navbar ref={measureNav} className="flex items-center justify-between gap-2">
                     <HomeNavLink />
                     <div className="flex items-center gap-2">
-                        {user ? (
-                            <>
-                                <Link href={route('account.show.dashboard')}>
-                                    <p className="text-sm">
-                                        Hi, <span className="font-bold">{user.name}</span>
-                                    </p>
-                                </Link>
-                                <form onSubmit={handleSubmit}>
-                                    <Button type="submit" variant={'outline'} size={'icon'}>
-                                        <LogOut />
-                                    </Button>
-                                </form>
-                            </>
-                        ) : (
-                            <>
-                                <Button variant="secondary">
-                                    <Link href={route('account.show.login')}>Login</Link>
-                                </Button>
-                                <Button variant="secondary">
-                                    <Link href={route('account.show.register')}>Register</Link>
-                                </Button>
-                            </>
-                        )}
+                        <AccountLinks />
+                        <ModeToggle />
                     </div>
                 </Navbar>
-                <main className={cn('grid pb-5', isAuthFormPage && 'place-items-center')}>{children}</main>
+                <main>{typeof children === 'function' ? children(navHeight) : children}</main>
             </div>
         </RootLayout>
     );

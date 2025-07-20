@@ -1,3 +1,4 @@
+import { AccountLinks } from '@/components/account-links';
 import HomeNavLink from '@/components/home-nav-link';
 import ModeToggle from '@/components/mode-toggle';
 import Navbar from '@/components/navbar';
@@ -8,9 +9,9 @@ import RootLayout from '@/layouts/root';
 import { cn, debounce } from '@/lib/utils';
 import { SharedData } from '@/types';
 import { Tag } from '@/types/domain';
-import { Link, router, useForm, usePage } from '@inertiajs/react';
-import { LogOut, Menu } from 'lucide-react';
-import { type ChangeEvent, FormEvent, ReactNode, useState } from 'react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { Menu } from 'lucide-react';
+import { type ChangeEvent, ReactNode, useState } from 'react';
 
 function SearchAndFilter({ filters, tags }: { filters: Record<string, string>; tags: Tag[] }) {
     return (
@@ -56,17 +57,9 @@ function SearchAndFilter({ filters, tags }: { filters: Record<string, string>; t
 export default function BaseLayout({ children }: { children: ReactNode }) {
     const page = usePage<SharedData>();
     const {
-        auth: { user },
         ziggy: { location },
         filters,
     } = page.props;
-
-    const form = useForm();
-
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        form.post(route('account.logout'));
-    };
 
     const [open, setOpen] = useState(false);
 
@@ -80,29 +73,7 @@ export default function BaseLayout({ children }: { children: ReactNode }) {
                     <div className="flex w-full justify-between">
                         <HomeNavLink />
                         <div className="flex items-center gap-2">
-                            {user ? (
-                                <>
-                                    <Link href={route('account.show.dashboard')}>
-                                        <p className="text-sm">
-                                            Hi, <span className="font-bold">{user.name}</span>
-                                        </p>
-                                    </Link>
-                                    <form onSubmit={handleSubmit}>
-                                        <Button type="submit" variant={'outline'} size={'icon'}>
-                                            <LogOut />
-                                        </Button>
-                                    </form>
-                                </>
-                            ) : (
-                                <>
-                                    <Button variant="link">
-                                        <Link href={route('account.show.login')}>Login</Link>
-                                    </Button>
-                                    <Button variant="link">
-                                        <Link href={route('account.show.register')}>Register</Link>
-                                    </Button>
-                                </>
-                            )}
+                            <AccountLinks />
                             <Button variant={'outline'} size={'icon'} onClick={() => setOpen((p) => !p)}>
                                 <Menu />
                             </Button>
@@ -122,27 +93,7 @@ export default function BaseLayout({ children }: { children: ReactNode }) {
                     </Link>
                     <div className={'flex flex-1 items-center gap-2'}>
                         <SearchAndFilter filters={filters} tags={page.props.tags} />
-                        {user ? (
-                            <>
-                                <p className="ml-1 text-sm whitespace-nowrap">
-                                    Hi, <span className="font-bold">{user.name}</span>
-                                </p>
-                                <form onSubmit={handleSubmit}>
-                                    <Button type="submit" variant={'outline'} size={'icon'}>
-                                        <LogOut />
-                                    </Button>
-                                </form>
-                            </>
-                        ) : (
-                            <>
-                                <Button variant="link">
-                                    <Link href={route('account.show.login')}>Login</Link>
-                                </Button>
-                                <Button variant="link">
-                                    <Link href={route('account.show.register')}>Register</Link>
-                                </Button>
-                            </>
-                        )}
+                        <AccountLinks />
                     </div>
                     <ModeToggle />
                 </Navbar>
